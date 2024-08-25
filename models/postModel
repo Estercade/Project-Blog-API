@@ -1,0 +1,139 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
+async function getAllPosts() {
+  const posts = await prisma.post.findMany();
+  return posts;
+}
+
+async function getPostByPostId(queryPostId) {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: queryPostId
+    },
+    include: {
+      comments: true
+    }
+  })
+  return post;
+}
+
+async function getPostsByUserId(queryUserId) {
+  const posts = await prisma.post.findMany({
+    where: {
+      authorId: queryUserId
+    }
+  })
+  return posts;
+}
+
+async function createPost(newTitle, newContent, newAuthorId, newPublishedState, newPublishedDate) {
+  const post = await prisma.post.create({
+    data: {
+      title: newTitle,
+      content: newContent,
+      authorId: newAuthorId,
+      published: newPublishedState,
+      publishedAt: newPublishedDate
+    }
+  })
+  return post;
+}
+
+async function updatePost(queryPostId, updatedTitle, updatedContent, updatedPublishedState) {
+  const post = await prisma.post.update({
+    where: {
+      id: queryPostId,
+    },
+    data: {
+      title: updatedTitle,
+      content: updatedContent,
+      lastEdited: new Date()
+    }
+  });
+  if (post.published === false && updatedPublishedState === true) {
+    const updatedPost = await prisma.post.update({
+      where: {
+        id: queryPostId
+      },
+      data: {
+        published: true,
+        publishedAt: new Date(),
+      }
+    })
+    return updatedPost;
+  }
+  return post;
+}
+
+async function deletePost(queryPostId) {
+  await prisma.post.delete({
+    where: {
+      id: queryPostId
+    }
+  });
+}
+
+async function publishPost(queryPostId) {
+  const post = await prisma.post.update({
+    where: {
+      id: queryPostId
+    },
+    data: {
+      published: true,
+      publishedAt: new Date(),
+    }
+  })
+  return post;
+}
+
+async function ratePost(queryPostId, updatedRating) {
+  let post = await getPostByPostId(queryPostId);
+  const updatedPost = await prisma.post.update({
+    where: {
+      id: queryPostId
+    },
+    data: {
+      totalRating: { increment: updatedRating },
+      ratingCount: { increment: 1 },
+      averageRating: ((post.totalRating + updatedRating) / (post.ratingCount + 1))
+    }
+  })
+  return updatedPost;
+}
+
+async function getCommentsByPostId(queryPostId) {
+  let { comments } = await prisma.post.findUnique({
+    where: {
+      id: queryPostId
+    },
+    select: {
+      comments: true
+    }
+  })
+  return comments;
+}
+
+async function createComment(queryPostId, newCommentContent, newAuthorId) {
+  const comment = await prisma.comment.create({
+    data: {
+      content: newCommentContent,
+      authorId: newAuthorId,
+      postId: queryPostId
+    }
+  })
+  return comment;
+}
+
+module.exports = {
+  getAllPosts,
+  getPostByPostId,
+  getPostsByUserId,
+  createPost,
+  updatePost,
+  deletePost,
+  publishPost,
+  ratePost,
+  getCommentsByPostId,
+  createComment
+}

@@ -1,0 +1,70 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
+async function createComment(newContent, newAuthorId, newPostId) {
+  const comment = await prisma.comment.create({
+    data: {
+      content: newContent,
+      authorId: newAuthorId,
+      postId: newPostId
+    }
+  })
+  return comment;
+}
+
+async function getCommentsByPostId(queryPostId) {
+  const comments = await prisma.comment.findMany({
+    where: {
+      postId: queryPostId
+    }
+  })
+  return comments;
+}
+
+async function getCommentsByCommentId(queryCommentId) {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: queryCommentId
+    }
+  })
+  return comment;
+}
+
+async function getCommentsByUser(queryUserId) {
+  const comments = await prisma.comment.findMany({
+    where: {
+      authorId: queryUserId
+    }
+  })
+  return comments;
+}
+
+async function updateComment(commentId, updatedContent) {
+  const comment = await prisma.comment.update({
+    where: {
+      id: commentId,
+    },
+    data: {
+      content: updatedContent,
+      lastEdited: new Date()
+    }
+  })
+  return comment;
+}
+
+async function deleteComment(commentId) {
+  await prisma.comment.delete({
+    where: {
+      id: commentId
+    }
+  });
+}
+
+module.exports = {
+  createComment,
+  getCommentsByCommentId,
+  getCommentsByPostId,
+  getCommentsByUser,
+  updateComment,
+  deleteComment
+}

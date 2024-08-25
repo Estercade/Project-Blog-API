@@ -1,0 +1,31 @@
+{
+  "name": "project-blog-api",
+  "version": "1.0.0",
+  "description": "This project was made following the instructions and specifications for The Odin Project NodeJS Course [Blog API project](https://www.theodinproject.com/lessons/node-path-nodejs-blog-api).",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Estercade/Project-Blog-API.git"
+  },
+  "author": "Wilson Lee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Estercade/Project-Blog-API/issues"
+  },
+  "homepage": "https://github.com/Estercade/Project-Blog-API#readme",
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "prisma": "^5.18.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}
