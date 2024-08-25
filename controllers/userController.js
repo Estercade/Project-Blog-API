@@ -14,24 +14,24 @@ async function createUser(req, res, next) {
       }
     }
   })
-  res.send(user);
+  res.json(user);
 }
 
 async function getAllUsers(req, res) {
   const users = await userModel.getAllUsers();
-  return res.send(users);
+  res.json(users);
 }
 
 async function getUserByUsername(req, res) {
   const username = req.params.username;
   const user = await userModel.getUserByUsername(username);
-  return res.send(user);
+  res.json(user);
 }
 
 async function getUserById(req, res) {
   const userId = req.params.userId;
   const user = await userModel.getUserById(userId);
-  return res.send(user);
+  res.json(user);
 }
 
 async function updateUser(req, res, next) {
@@ -39,25 +39,25 @@ async function updateUser(req, res, next) {
   const { newUsername, email } = req.body;
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const user = await userModel.updateUser(username, newUsername, hashedPassword, email);
-  return res.send(user);
+  res.json(user);
 }
 
 async function deleteUser(req, res) {
   const userId = req.params.userId;
   await userModel.deleteUser(userId);
-  res.send("User deleted");
+  res.json("User deleted");
 }
 
 async function getPostsByUsername(req, res) {
   const username = req.params.username;
   const posts = await userModel.getPostsByUsername(username);
-  res.send(posts);
+  res.json(posts);
 }
 
 async function getCommentsByUsername(req, res) {
   const username = req.params.username;
   const comments = await userModel.getCommentsByUsername(username);
-  res.send(comments);
+  res.json(comments);
 }
 
 module.exports = {
