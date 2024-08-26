@@ -1,12 +1,16 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-async function createUser(newUsername, newPassword, newEmail) {
+async function createUser(query) {
   const user = await prisma.user.create({
     data: {
-      username: newUsername,
-      password: newPassword,
-      email: newEmail,
+      username: query.username,
+      password: query.password,
+      email: query.email,
+    },
+    select: {
+      username: true,
+      email: true
     }
   });
   return user;
@@ -17,49 +21,91 @@ async function getAllUsers() {
   return users;
 }
 
-async function getUserByUsername(queryUsername) {
+async function getUserByUsername(targetUsername) {
   const user = await prisma.user.findUnique({
     where: {
-      username: queryUsername
+      username: targetUsername
+    },
+    select: {
+      username: true,
+      posts: {
+        where: {
+          published: true
+        },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          publishedAt: true,
+          author: {
+            select: {
+              username: true
+            }
+          },
+          averageRating: true,
+          _count: {
+            select: { comments: true },
+          },
+        }
+      },
+      comments: {
+        select: {
+          id: true,
+          content: true,
+          posted: true,
+          postId: true,
+          author: {
+            select: {
+              username: true
+            }
+          },
+        }
+      },
     }
   });
   return user;
 }
 
-async function getUserById(queryUserId) {
+async function getUserById(targetUserId) {
   const user = await prisma.user.findUnique({
     where: {
-      id: queryUserId
+      id: targetUserId
+    },
+    select: {
+      username: true,
+      email: true,
+      posts: true,
+      comments: true,
     }
   });
 }
 
-async function updateUser(queryUsername, newUsername, newPassword, newEmail) {
+async function updateUser(targetUsername, query) {
   const user = await prisma.user.update({
     where: {
-      username: queryUsername,
+      username: targetUsername,
     },
     data: {
-      username: newUsername,
-      password: newPassword,
-      email: newEmail
+      username: query.username,
+      password: query.password,
+      email: query.email
     }
   });
   return user;
 }
 
-async function deleteUser(queryUserId) {
+async function deleteUser(targetUserId) {
   await prisma.user.delete({
     where: {
-      id: queryUserId
+      id: targetUserId
     }
   });
 }
 
-async function getPostsByUsername(queryUsername) {
+async function getPostsByUsername(targetUsername) {
   const [{ posts }] = await prisma.user.findMany({
     where: {
-      username: queryUsername
+      username: targetUsername
     },
     select: {
       posts: true,
@@ -68,12 +114,13 @@ async function getPostsByUsername(queryUsername) {
   return posts;
 }
 
-async function getCommentsByUsername(queryUsername) {
+async function getCommentsByUsername(targetUsername) {
   const [{ comments }] = await prisma.user.findMany({
     where: {
-      username: queryUsername
+      username: targetUsername
     },
     select: {
+      username: true,
       comments: true,
     }
   })

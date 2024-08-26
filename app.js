@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const routes = require("./routes/index");
@@ -6,8 +6,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
+const JwtStrategy = require("passport-jwt").Strategy;
+const ExtractJwt = require("passport-jwt").ExtractJwt;
 const bcrypt = require("bcryptjs");
 
 passport.use(new JwtStrategy({
@@ -38,34 +38,43 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
-app.post("/login", async (req, res) => {
+app.post("/login", async (req, res, next) => {
   const { username, password } = req.body;
   const user = await prisma.user.findUnique({
     where: {
       username: username
     }
   });
-  if (!user) {
-    return done(null, false, { message: "Incorrect username or password." });
+  try {
+    if (!user) {
+      throw new Error("Incorrect username or password.");
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      throw new Error("Incorrect username or password.");
+    }
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.SECRET_KEY, {
+      expiresIn: "3h"
+    });
+    res.json({ token });
   }
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) {
-    return done(null, false, { message: "Incorrect username or password." });
+  catch (err) {
+    res.status(401).send(err);
   }
-  const token = jwt.sign({ userId: user.id, role: user.role }, process.env.SECRET_KEY, {
-    expiresIn: "3h"
-  });
-  res.json({ token });
 });
 
-app.use("*", passport.authenticate('jwt', { session: false }),
+app.use("/protected", passport.authenticate("jwt", { session: false }),
   function (req, res, next) {
-    next();
+    res.json("hello protected world");
   })
 
 app.use("/users", routes.user);
 app.use("/posts", routes.post);
 app.use("/comments", routes.comment);
+
+app.use((err, req, res, next) => {
+  console.log("bad");
+})
 
 const PORT = process.env.PORT || 3000;
 

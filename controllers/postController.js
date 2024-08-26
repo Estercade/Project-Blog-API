@@ -6,68 +6,68 @@ async function getAllPosts(req, res) {
 }
 
 async function getPostByPostId(req, res) {
-  const postId = req.params.postId;
-  const post = await postModel.getPostByPostId(postId);
+  const post = await postModel.getPostByPostId(req.params.postId);
   res.json(post);
 }
 
 async function getPostsByUserId(req, res) {
-  const queryUserId = req.userId;
-  const posts = await postModel.getPostsByUserId(queryUserId);
+  const posts = await postModel.getPostsByUserId(req.userId);
   res.json(posts);
 }
 
 async function createPost(req, res) {
-  const { title, content, authorId } = req.body;
-  let published = publishedDate = undefined;
-  if (req.body.published === "true" | req.body.published === true) {
-    published = true;
-    publishedDate = new Date();
+  const query = {
+    title: req.body.title,
+    content: req.body.content,
+    authorId: req.body.authorId,
+    published: undefined,
+    publishedDate: undefined
   }
-  const post = await postModel.createPost(title, content, authorId, published, publishedDate);
+  if (req.body.published === "true" | req.body.published === true) {
+    query.published = true;
+    query.publishedDate = new Date();
+  }
+  const post = await postModel.createPost(query);
   res.json(post);
 }
 
 async function updatePost(req, res) {
-  const postId = req.params.postId;
-  const { title, content } = req.body;
-  let published = undefined;
-  if (req.body.published === "true" | req.body.published === true) {
-    published = true;
+  const query = {
+    title: req.body.title,
+    content: req.body.content,
+    published: undefined,
+    publishedDate: undefined
   }
-  const post = await postModel.updatePost(postId, title, content, published);
+  if (req.body.published === "true" | req.body.published === true) {
+    query.published = true;
+  }
+  const post = await postModel.updatePost(req.params.postId, query);
   res.json(post);
 }
 
 async function deletePost(req, res) {
-  const postId = req.params.postId;
-  await postModel.deletePost(postId);
+  await postModel.deletePost(req.params.postId);
   res.json("Post deleted");
 }
 
 async function publishPost(req, res) {
-  const postId = req.params.postId;
-  const post = await postModel.publishPost(postId);
+  const post = await postModel.publishPost(req.params.postId);
   res.json(post);
 }
 
 async function ratePost(req, res) {
-  const postId = req.params.postId;
   const rating = Number(req.body.rating);
-  const post = await postModel.ratePost(postId, rating);
+  const post = await postModel.ratePost(req.params.postId, rating);
   res.json(post);
 }
 
 async function getCommentsByPostId(req, res) {
-  const postId = req.params.postId;
-  const comments = await postModel.getCommentsByPostId(postId);
+  const comments = await postModel.getCommentsByPostId(req.params.postId);
   res.json(comments);
 }
 
 async function createComment(req, res) {
-  const postId = req.params.postId;
-  const { authorId, content } = req.body;
-  const comment = await postModel.createComment(postId, content, authorId);
+  const comment = await postModel.createComment(req.params.postId, req.body);
   res.json(comment);
 }
 

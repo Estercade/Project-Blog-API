@@ -2,18 +2,57 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function getAllPosts() {
-  const posts = await prisma.post.findMany();
+  const posts = await prisma.post.findMany({
+    where: {
+      published: true,
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      publishedAt: true,
+      author: {
+        select: {
+          username: true,
+        }
+      },
+      averageRating: true,
+      _count: {
+        select: { comments: true },
+      },
+    }
+  });
   return posts;
 }
 
-async function getPostByPostId(queryPostId) {
+async function getPostByPostId(targetPostId) {
   const post = await prisma.post.findUnique({
     where: {
-      id: queryPostId
+      id: targetPostId
     },
-    include: {
-      comments: true
-    }
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      publishedAt: true,
+      author: {
+        select: {
+          username: true,
+        }
+      },
+      averageRating: true,
+      ratingCount: true,
+      comments: {
+        select: {
+          content: true,
+          author: {
+            select: {
+              username: true
+            }
+          }
+        }
+      },
+    },
   })
   return post;
 }
@@ -27,34 +66,34 @@ async function getPostsByUserId(queryUserId) {
   return posts;
 }
 
-async function createPost(newTitle, newContent, newAuthorId, newPublishedState, newPublishedDate) {
+async function createPost(query) {
   const post = await prisma.post.create({
     data: {
-      title: newTitle,
-      content: newContent,
-      authorId: newAuthorId,
-      published: newPublishedState,
-      publishedAt: newPublishedDate
+      title: query.title,
+      content: query.content,
+      authorId: query.authorId,
+      published: query.published,
+      publishedAt: query.publishedAt
     }
   })
   return post;
 }
 
-async function updatePost(queryPostId, updatedTitle, updatedContent, updatedPublishedState) {
+async function updatePost(targetPostId, query) {
   const post = await prisma.post.update({
     where: {
-      id: queryPostId,
+      id: targetPostId,
     },
     data: {
-      title: updatedTitle,
-      content: updatedContent,
+      title: query.title,
+      content: query.content,
       lastEdited: new Date()
     }
   });
-  if (post.published === false && updatedPublishedState === true) {
+  if (post.published === false && query.publishedState === true) {
     const updatedPost = await prisma.post.update({
       where: {
-        id: queryPostId
+        id: targetPostId
       },
       data: {
         published: true,
@@ -66,18 +105,18 @@ async function updatePost(queryPostId, updatedTitle, updatedContent, updatedPubl
   return post;
 }
 
-async function deletePost(queryPostId) {
+async function deletePost(targetPostId) {
   await prisma.post.delete({
     where: {
-      id: queryPostId
+      id: targetPostId
     }
   });
 }
 
-async function publishPost(queryPostId) {
+async function publishPost(targetPostId) {
   const post = await prisma.post.update({
     where: {
-      id: queryPostId
+      id: targetPostId
     },
     data: {
       published: true,
@@ -87,11 +126,11 @@ async function publishPost(queryPostId) {
   return post;
 }
 
-async function ratePost(queryPostId, updatedRating) {
-  let post = await getPostByPostId(queryPostId);
+async function ratePost(targetPostId, updatedRating) {
+  let post = await getPostByPostId(targetPostId);
   const updatedPost = await prisma.post.update({
     where: {
-      id: queryPostId
+      id: targetPostId
     },
     data: {
       totalRating: { increment: updatedRating },
@@ -102,24 +141,28 @@ async function ratePost(queryPostId, updatedRating) {
   return updatedPost;
 }
 
-async function getCommentsByPostId(queryPostId) {
+async function getCommentsByPostId(targetPostId) {
   let { comments } = await prisma.post.findUnique({
     where: {
-      id: queryPostId
+      id: targetPostId
     },
     select: {
-      comments: true
+      comments: {
+        select: {
+          username: true,
+        }
+      }
     }
   })
   return comments;
 }
 
-async function createComment(queryPostId, newCommentContent, newAuthorId) {
+async function createComment(targetPostId, query) {
   const comment = await prisma.comment.create({
     data: {
-      content: newCommentContent,
-      authorId: newAuthorId,
-      postId: queryPostId
+      content: query.content,
+      authorId: query.authorId,
+      postId: targetPostId
     }
   })
   return comment;
