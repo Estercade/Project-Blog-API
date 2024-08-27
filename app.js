@@ -47,15 +47,16 @@ app.post("/login", async (req, res, next) => {
   });
   try {
     if (!user) {
-      throw new Error("Incorrect username or password.");
+      return res.status(401).send("Incorrect username or password.");
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      throw new Error("Incorrect username or password.");
+      return res.status(401).send("Incorrect username or password.");
     }
     const token = jwt.sign({ userId: user.id, role: user.role }, process.env.SECRET_KEY, {
       expiresIn: "3h"
     });
+    console.log(token);
     res.json({ token });
   }
   catch (err) {
@@ -63,9 +64,14 @@ app.post("/login", async (req, res, next) => {
   }
 });
 
+app.post("/posts", passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    next();
+  })
+
 app.use("/protected", passport.authenticate("jwt", { session: false }),
   function (req, res, next) {
-    res.json("hello protected world");
+    res.json("protected route");
   })
 
 app.use("/users", routes.user);
@@ -73,7 +79,7 @@ app.use("/posts", routes.post);
 app.use("/comments", routes.comment);
 
 app.use((err, req, res, next) => {
-  console.log("bad");
+  res.status(404).json("Not found");
 })
 
 const PORT = process.env.PORT || 3000;

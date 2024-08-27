@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-async function getAllPosts() {
+async function getAllPosts(order) {
   const posts = await prisma.post.findMany({
     where: {
       published: true,
@@ -20,15 +20,78 @@ async function getAllPosts() {
       _count: {
         select: { comments: true },
       },
-    }
+    },
+    orderBy: order
   });
   return posts;
 }
 
-async function getPostByPostId(targetPostId) {
+async function getPostByPostId(targetPostId, currentUserId) {
   const post = await prisma.post.findUnique({
     where: {
       id: targetPostId
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      published: true,
+      publishedAt: true,
+      author: {
+        select: {
+          username: true,
+        }
+      },
+      averageRating: true,
+      ratingCount: true,
+      comments: {
+        select: {
+          id: true,
+          content: true,
+          author: {
+            select: {
+              username: true
+            }
+          },
+          posted: true
+        }
+      },
+    },
+  })
+  if (post.published !== true) {
+    const { authorId } = await prisma.post.findUnique({
+      where: {
+        id: targetPostId
+      },
+      select: {
+        authorId: true
+      }
+    })
+    // database query will return null if author id does not match current user's id
+    if (authorId !== currentUserId) {
+      return null;
+    }
+  }
+  return post;
+}
+
+async function getPostsByUserId(queryUserId) {
+  const posts = await prisma.post.findMany({
+    where: {
+      authorId: queryUserId
+    }
+  })
+  return posts;
+}
+
+async function createPost(query) {
+  const post = await prisma.post.create({
+    data: {
+      title: query.title,
+      content: query.content,
+      authorId: query.authorId,
+      published: query.published,
+      publishedAt: query.publishedAt
     },
     select: {
       id: true,
@@ -57,28 +120,6 @@ async function getPostByPostId(targetPostId) {
   return post;
 }
 
-async function getPostsByUserId(queryUserId) {
-  const posts = await prisma.post.findMany({
-    where: {
-      authorId: queryUserId
-    }
-  })
-  return posts;
-}
-
-async function createPost(query) {
-  const post = await prisma.post.create({
-    data: {
-      title: query.title,
-      content: query.content,
-      authorId: query.authorId,
-      published: query.published,
-      publishedAt: query.publishedAt
-    }
-  })
-  return post;
-}
-
 async function updatePost(targetPostId, query) {
   const post = await prisma.post.update({
     where: {
@@ -96,6 +137,7 @@ async function updatePost(targetPostId, query) {
         id: targetPostId
       },
       data: {
+        lastEdited: null,
         published: true,
         publishedAt: new Date(),
       }
