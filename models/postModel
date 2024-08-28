@@ -146,7 +146,7 @@ async function updatePost(query) {
   }
   let updatedPost = await prisma.post.update({
     where: {
-      id: targetPostId,
+      id: query.postId,
     },
     data: {
       title: query.title,
@@ -157,7 +157,7 @@ async function updatePost(query) {
   if (updatedPost.published === false && query.published === true) {
     updatedPost = await prisma.post.update({
       where: {
-        id: targetPostId
+        id: query.postId
       },
       data: {
         lastEdited: null,
