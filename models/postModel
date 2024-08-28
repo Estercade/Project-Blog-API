@@ -131,17 +131,17 @@ async function createPost(query) {
   return post;
 }
 
-async function updatePost(targetPostId, query, currentUserId) {
+async function updatePost(query) {
   const { authorId } = await prisma.post.findUnique({
     where: {
-      id: targetPostId
+      id: query.postId
     },
     select: {
       authorId: true
     }
   })
   // database query will return "forbidden" if author id does not match current user's id
-  if (authorId !== currentUserId) {
+  if (authorId !== query.userId) {
     return "forbidden";
   }
   let updatedPost = await prisma.post.update({
@@ -154,7 +154,7 @@ async function updatePost(targetPostId, query, currentUserId) {
       lastEdited: new Date()
     }
   });
-  if (updatedPost.published === false && query.publishedState === true) {
+  if (updatedPost.published === false && query.published === true) {
     updatedPost = await prisma.post.update({
       where: {
         id: targetPostId

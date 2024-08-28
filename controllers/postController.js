@@ -68,6 +68,8 @@ async function updatePost(req, res) {
     currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   }
   const query = {
+    postId: req.params.postId,
+    userId: currentUserId,
     title: req.body.title,
     content: req.body.content,
     published: undefined,
@@ -76,7 +78,7 @@ async function updatePost(req, res) {
   if (req.body.published === "true" | req.body.published === true) {
     query.published = true;
   }
-  const post = await postModel.updatePost(req.params.postId, query, currentUserId);
+  const post = await postModel.updatePost(query);
   // database query will return "forbidden" if author id does not match current user"s id
   if (post === "forbidden") {
     return res.status(403).json("You do not have access to this file.");

@@ -32,6 +32,28 @@ passport.use(new JwtStrategy({
     }
   }))
 
+passport.use(new JwtStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.SECRET_KEY,
+  passReqToCallback: true,
+},
+  async (req, jwt_payload, done) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: jwt_payload.userId,
+        }
+      })
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      }
+    } catch (err) {
+      return done(err, false);
+    }
+  }))
+
 const app = express();
 
 app.use(express.json());
