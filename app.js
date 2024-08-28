@@ -12,9 +12,10 @@ const bcrypt = require("bcryptjs");
 
 passport.use(new JwtStrategy({
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.SECRET_KEY
+  secretOrKey: process.env.SECRET_KEY,
+  passReqToCallback: true,
 },
-  async (jwt_payload, done) => {
+  async (req, jwt_payload, done) => {
     try {
       const user = await prisma.user.findUnique({
         where: {
@@ -33,7 +34,7 @@ passport.use(new JwtStrategy({
 
 const app = express();
 
-app.use(express.json())
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
@@ -56,8 +57,8 @@ app.post("/login", async (req, res, next) => {
     const token = jwt.sign({ userId: user.id, role: user.role }, process.env.SECRET_KEY, {
       expiresIn: "3h"
     });
-    console.log(token);
-    res.json({ token });
+    const currentUser = user.username;
+    res.json({ token, currentUser });
   }
   catch (err) {
     res.status(401).send(err);
@@ -67,12 +68,12 @@ app.post("/login", async (req, res, next) => {
 app.post("/posts", passport.authenticate("jwt", { session: false }),
   function (req, res, next) {
     next();
-  })
+  });
 
-app.use("/protected", passport.authenticate("jwt", { session: false }),
+app.put("/posts", passport.authenticate("jwt", { session: false }),
   function (req, res, next) {
-    res.json("protected route");
-  })
+    next();
+  });
 
 app.use("/users", routes.user);
 app.use("/posts", routes.post);
@@ -84,4 +85,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => console.log(`App is now listening on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', function (err) {
+  if (err) console.log("Error in server setup")
+  console.log("Started listening on %s", PORT);
+});

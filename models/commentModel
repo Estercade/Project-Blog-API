@@ -1,12 +1,12 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-async function createComment(newContent, newAuthorId, newPostId) {
+async function createComment(query) {
   const comment = await prisma.comment.create({
     data: {
-      content: newContent,
-      authorId: newAuthorId,
-      postId: newPostId
+      content: query.content,
+      authorId: query.authorId,
+      postId: query.postId
     }
   })
   return comment;

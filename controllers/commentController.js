@@ -1,8 +1,12 @@
 const commentModel = require("../models/commentModel");
 
 async function createComment(req, res) {
-  const { content, authorId, postId } = req.body;
-  const comment = await commentModel.createComment(content, authorId, postId);
+  query = {
+    content: req.body.content,
+    authorId: req.body.authorId,
+    postId: req.body.postId,
+  }
+  const comment = await commentModel.createComment(query);
   res.json(comment);
 }
 

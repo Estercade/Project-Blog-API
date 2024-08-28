@@ -11,6 +11,7 @@ async function getAllPosts(order) {
       title: true,
       content: true,
       publishedAt: true,
+      lastEdited: true,
       author: {
         select: {
           username: true,
@@ -37,6 +38,7 @@ async function getPostByPostId(targetPostId, currentUserId) {
       content: true,
       published: true,
       publishedAt: true,
+      lastEdited: true,
       author: {
         select: {
           username: true,
@@ -58,7 +60,7 @@ async function getPostByPostId(targetPostId, currentUserId) {
       },
     },
   })
-  if (post.published !== true) {
+  if (post && !post.published) {
     const { authorId } = await prisma.post.findUnique({
       where: {
         id: targetPostId
@@ -67,20 +69,29 @@ async function getPostByPostId(targetPostId, currentUserId) {
         authorId: true
       }
     })
-    // database query will return null if author id does not match current user's id
+    // database query will return "forbidden" if author id does not match current user's id
     if (authorId !== currentUserId) {
-      return null;
+      return "forbidden";
     }
   }
   return post;
 }
 
-async function getPostsByUserId(queryUserId) {
-  const posts = await prisma.post.findMany({
-    where: {
-      authorId: queryUserId
-    }
-  })
+async function getPostsByUserId(queryUserId, currentUserId) {
+  if (queryUserId === currentUserId) {
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: queryUserId
+      }
+    })
+  } else {
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: queryUserId,
+        published: true
+      }
+    })
+  }
   return posts;
 }
 
@@ -120,8 +131,20 @@ async function createPost(query) {
   return post;
 }
 
-async function updatePost(targetPostId, query) {
-  const post = await prisma.post.update({
+async function updatePost(targetPostId, query, currentUserId) {
+  const { authorId } = await prisma.post.findUnique({
+    where: {
+      id: targetPostId
+    },
+    select: {
+      authorId: true
+    }
+  })
+  // database query will return "forbidden" if author id does not match current user's id
+  if (authorId !== currentUserId) {
+    return "forbidden";
+  }
+  let updatedPost = await prisma.post.update({
     where: {
       id: targetPostId,
     },
@@ -131,8 +154,8 @@ async function updatePost(targetPostId, query) {
       lastEdited: new Date()
     }
   });
-  if (post.published === false && query.publishedState === true) {
-    const updatedPost = await prisma.post.update({
+  if (updatedPost.published === false && query.publishedState === true) {
+    updatedPost = await prisma.post.update({
       where: {
         id: targetPostId
       },
@@ -142,17 +165,29 @@ async function updatePost(targetPostId, query) {
         publishedAt: new Date(),
       }
     })
-    return updatedPost;
   }
-  return post;
+  return updatedPost;
 }
 
-async function deletePost(targetPostId) {
+async function deletePost(targetPostId, currentUserId) {
+  const { authorId } = await prisma.post.findUnique({
+    where: {
+      id: targetPostId
+    },
+    select: {
+      authorId: true
+    }
+  })
+  // database query will return "forbidden" if author id does not match current user's id
+  if (authorId !== currentUserId) {
+    return "forbidden";
+  }
   await prisma.post.delete({
     where: {
       id: targetPostId
     }
   });
+  return ("Post has been deleted");
 }
 
 async function publishPost(targetPostId) {
@@ -192,6 +227,7 @@ async function getCommentsByPostId(targetPostId) {
       comments: {
         select: {
           username: true,
+          lastEdited: true
         }
       }
     }
@@ -199,12 +235,23 @@ async function getCommentsByPostId(targetPostId) {
   return comments;
 }
 
-async function createComment(targetPostId, query) {
+async function createComment(query) {
   const comment = await prisma.comment.create({
     data: {
       content: query.content,
       authorId: query.authorId,
-      postId: targetPostId
+      postId: query.postId
+    },
+    select: {
+      content: true,
+      author: {
+        select: {
+          username: true
+        }
+      },
+      postId: true,
+      posted: true,
+      lastEdited: true
     }
   })
   return comment;

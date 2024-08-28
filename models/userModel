@@ -53,7 +53,12 @@ async function getUserByUsername(targetUsername) {
           id: true,
           content: true,
           posted: true,
-          postId: true,
+          post: {
+            select: {
+              id: true,
+              title: true
+            }
+          },
           author: {
             select: {
               username: true
