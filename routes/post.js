@@ -11,6 +11,6 @@ router.delete("/:postId", postController.deletePost);
 router.patch("/:postId/published", postController.publishPost);
 router.patch("/:postId/totalRating", postController.ratePost);
 router.get("/:postId/comments", postController.getCommentsByPostId);
-router.post("/:postId/comments", postController.createComment);
+router.post("/:postId/comments", postController.createCommentByPostId);
 
 module.exports = router;

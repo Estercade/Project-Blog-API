@@ -32,28 +32,6 @@ passport.use(new JwtStrategy({
     }
   }))
 
-passport.use(new JwtStrategy({
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.SECRET_KEY,
-  passReqToCallback: true,
-},
-  async (req, jwt_payload, done) => {
-    try {
-      const user = await prisma.user.findUnique({
-        where: {
-          id: jwt_payload.userId,
-        }
-      })
-      if (user) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
-    } catch (err) {
-      return done(err, false);
-    }
-  }))
-
 const app = express();
 
 app.use(express.json());
@@ -63,6 +41,9 @@ app.use(cors());
 
 app.post("/login", async (req, res, next) => {
   const { username, password } = req.body;
+  if (!username | !password) {
+    return res.status(401).send("Incorrect username or password.");
+  }
   const user = await prisma.user.findUnique({
     where: {
       username: username
@@ -87,12 +68,37 @@ app.post("/login", async (req, res, next) => {
   }
 });
 
+app.put("/users", passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    next();
+  });
+
+app.delete("/users", passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    next();
+  });
+
+app.get("/users/:userid/drafts", passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    next();
+  });
+
 app.post("/posts", passport.authenticate("jwt", { session: false }),
   function (req, res, next) {
     next();
   });
 
 app.put("/posts", passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    next();
+  });
+
+app.delete("/posts", passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    next();
+  });
+
+app.post("/users", passport.authenticate("jwt", { session: false }),
   function (req, res, next) {
     next();
   });

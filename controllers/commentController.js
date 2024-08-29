@@ -1,4 +1,5 @@
 const commentModel = require("../models/commentModel");
+const jwt = require("jsonwebtoken");
 
 async function createComment(req, res) {
   query = {
@@ -11,14 +12,26 @@ async function createComment(req, res) {
 }
 
 async function getCommentsByPostId(req, res) {
-  const postId = req.params.postId;
-  const comments = await commentModel.getCommentsByPostId(postId);
+  const query = {
+    postId: req.params.postId
+  }
+  const comments = await commentModel.getCommentsByPostId(query);
+  // database query will return null if specified comment does not exist
+  if (comments === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(comments);
 }
 
 async function getCommentsByCommentId(req, res) {
-  const commentId = req.params.commentId;
-  const comment = await commentModel.getCommentsByCommentId(commentId);
+  const query = {
+    commentId: req.params.commentId
+  }
+  const comment = await commentModel.getCommentsByCommentId(query);
+  // database query will return null if specified comment does not exist
+  if (comment === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(comment);
 }
 
@@ -29,16 +42,42 @@ async function getCommentsByUser(req, res) {
 }
 
 async function updateComment(req, res) {
-  const commentId = req.params.commentId;
-  const content = req.body.content;
-  const comment = await commentModel.updateComment(commentId, content);
+  // if data is missing from request body, return HTTP error
+  if (!req.body.content) {
+    return res.status(400).json("Required information in request body is missing.");
+  }
+  const query = {
+    commentId: req.params.commentId,
+    content: req.body.content
+  }
+  const comment = await commentModel.updateComment(query);
+  // database query will return null if specified comment does not exist
+  if (comment === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(comment);
 }
 
 async function deleteComment(req, res) {
-  const commentId = req.params.commentId;
-  await commentModel.deleteComment(commentId);
-  res.json("Comment deleted");
+  // return HTTP error if client is not authenticated
+  if (!req.headers.authorization) {
+    return res.status(403).json("You do not have access to this file.");
+  }
+  const currentUserId = jwt.decode((req.headers.authorization.split(' ')[1]), { complete: true }).payload.userId;
+  const query = {
+    userId: currentUserId,
+    commentId: req.params.commentId
+  }
+  const post = await commentModel.deleteComment(query);
+  // database query will return null if specified post does not exist
+  if (post === null) {
+    return res.status(404).json("Resource not found.");
+  }
+  // database query will return forbidden if author id does not match current user's id
+  if (post === "forbidden") {
+    return res.status(403).json("You do not have access to this file.");
+  }
+  res.status(204).json("Comment has been deleted");
 }
 
 module.exports = {

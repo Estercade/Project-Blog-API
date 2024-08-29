@@ -12,19 +12,19 @@ async function createComment(query) {
   return comment;
 }
 
-async function getCommentsByPostId(queryPostId) {
+async function getCommentsByPostId(query) {
   const comments = await prisma.comment.findMany({
     where: {
-      postId: queryPostId
+      postId: query.postId
     }
   })
   return comments;
 }
 
-async function getCommentsByCommentId(queryCommentId) {
+async function getCommentsByCommentId(query) {
   const comment = await prisma.comment.findUnique({
     where: {
-      id: queryCommentId
+      id: query.commentId
     }
   })
   return comment;
@@ -39,25 +39,49 @@ async function getCommentsByUser(queryUserId) {
   return comments;
 }
 
-async function updateComment(commentId, updatedContent) {
-  const comment = await prisma.comment.update({
+async function updateComment(query) {
+  const comment = await prisma.comment.findUnique({
     where: {
-      id: commentId,
+      id: query.commentId,
+    }
+  });
+  if (!comment) return null;
+  const updatedComment = await prisma.comment.update({
+    where: {
+      id: query.commentId,
     },
     data: {
-      content: updatedContent,
+      content: query.content,
       lastEdited: new Date()
     }
   })
-  return comment;
+  return commupdatedCommentent;
 }
 
-async function deleteComment(commentId) {
+async function deleteComment(query) {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: query.commentId
+    },
+    select: {
+      authorId: true
+    }
+  })
+  // if comment is not found, return "null"
+  if (!comment) {
+    return null;
+  }
+
+  // database query will return "forbidden" if author id does not match current user's id
+  if (comment.authorId !== query.userId) {
+    return "forbidden";
+  }
   await prisma.comment.delete({
     where: {
-      id: commentId
+      id: query.commentId
     }
   });
+  return "deleted";
 }
 
 module.exports = {

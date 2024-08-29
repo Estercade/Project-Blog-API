@@ -11,5 +11,6 @@ router.put("/:username", userController.updateUser);
 router.delete("/:username", userController.deleteUser);
 router.get("/:username/posts", userController.getPostsByUsername);
 router.get("/:username/comments", userController.getCommentsByUsername);
+router.get("/:username/drafts", userController.getDraftsByUsername);
 
 module.exports = router;

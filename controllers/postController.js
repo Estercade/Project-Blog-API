@@ -2,51 +2,55 @@ const postModel = require("../models/postModel");
 const jwt = require("jsonwebtoken");
 
 async function getAllPosts(req, res) {
-  const order = {};
+  const sort = {};
   switch (req.query.sort) {
     case "date":
-      order["publishedAt"] = req.query.order;
+      sort["publishedAt"] = (req.query.order || "asc");
       break;
-    case "name":
-      order["title"] = req.query.order;
+    case "title":
+      sort["title"] = (req.query.order || "asc");
       break;
     case "rating":
-      order["averageRating"] = req.query.order;
+      sort["averageRating"] = (req.query.order || "asc");
       break;
     case "comments":
-      order["comments"] = { "_count": req.query.order };
+      sort["comments"] = { "_count": (req.query.order || "asc") };
       break;
+    case "username":
+      sort["author.username"] = (req.query.order || "asc");
   }
-  const posts = await postModel.getAllPosts(order);
+  const query = {
+    sort: sort
+  }
+  const posts = await postModel.getAllPosts(query);
   res.json(posts);
 }
 
 async function getPostByPostId(req, res) {
-  const postId = req.params.postId;
-  let currentUserId = undefined;
+  const query = {
+    userId: undefined,
+    postId: req.params.postId,
+  }
+  // retrieve current user's id
   if (req.headers.authorization) {
     currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   }
-  const post = await postModel.getPostByPostId(postId, currentUserId);
-  // database query will return invalid if author id does not match current user"s id
+  const post = await postModel.getPostByPostId(query);
+  // database query will return invalid if author id does not match current user's id 
+  // and post is unpublished (draft)
   if (post === "forbidden") {
     return res.status(403).json("You do not have access to this file.");
   }
   res.json(post);
 }
 
-async function getPostsByUserId(req, res) {
-  let currentUserId = undefined;
-  if (req.headers.authorization) {
-    currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
-  }
-  const posts = await postModel.getPostsByUserId(req.userId, currentUserId);
-  res.json(posts);
-}
-
 async function createPost(req, res) {
-  const token = (req.headers.authorization.split(" ")[1])
-  const currentUserId = jwt.decode(token, { complete: true }).payload.userId;
+  // if data is missing from request body, return HTTP error
+  if (!req.body.title | req.body.content) {
+    return res.status(400).json("Required information in request body is missing.");
+  }
+  // retrieve current userId
+  const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   const query = {
     title: req.body.title,
     content: req.body.content,
@@ -63,7 +67,12 @@ async function createPost(req, res) {
 }
 
 async function updatePost(req, res) {
+  // if data is missing from request body, return HTTP error
+  if (!req.body.title | req.body.content) {
+    return res.status(400).json("Required information in request body is missing.");
+  }
   let currentUserId = undefined;
+  // retrieve current userId
   if (req.headers.authorization) {
     currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   }
@@ -87,54 +96,90 @@ async function updatePost(req, res) {
 }
 
 async function deletePost(req, res) {
-  let currentUserId = undefined;
-  if (req.headers.authorization) {
-    currentUserId = jwt.decode((req.headers.authorization.split(' ')[1]), { complete: true }).payload.userId;
+  // return HTTP error if client is not authenticated
+  if (!req.headers.authorization) {
+    return res.status(403).json("You do not have access to this file.");
   }
-  const post = await postModel.deletePost(req.params.postId, currentUserId);
-  // database query will return null if author id does not match current user's id
+  const currentUserId = jwt.decode((req.headers.authorization.split(' ')[1]), { complete: true }).payload.userId;
+  const query = {
+    userId: currentUserId,
+    postId: req.params.postId
+  }
+  const post = await postModel.deletePost(query);
+  // database query will return null if specified post does not exist
+  if (post === null) {
+    return res.status(404).json("Resource not found.");
+  }
+  // database query will return forbidden if author id does not match current user's id
   if (post === "forbidden") {
     return res.status(403).json("You do not have access to this file.");
   }
-  res.json("Post has been deleted");
+  res.status(204).json("Post has been deleted");
 }
 
 async function publishPost(req, res) {
   const post = await postModel.publishPost(req.params.postId);
+  // database query will return null if specified post does not exist
+  if (post === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(post);
 }
 
 async function ratePost(req, res) {
+  // if data is missing from request body, return HTTP error
+  if (!req.body.rating) {
+    return res.status(400).json("Required information in request body is missing.");
+  }
   const rating = Number(req.body.rating);
   const post = await postModel.ratePost(req.params.postId, rating);
+  // database query will return null if specified post does not exist
+  if (post === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(post);
 }
 
 async function getCommentsByPostId(req, res) {
-  const comments = await postModel.getCommentsByPostId(req.params.postId);
+  const query = {
+    postId: req.params.postId
+  }
+  const comments = await postModel.getCommentsByPostId(query);
+  // database query will return null if specified post does not exist
+  if (comments === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(comments);
 }
 
-async function createComment(req, res) {
+async function createCommentByPostId(req, res) {
+  // if data is missing from request body, return HTTP error
+  if (!req.body.content) {
+    return res.status(400).json("Required information in request body is missing.");
+  }
   const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   const query = {
     content: req.body.content,
     authorId: currentUserId,
-    postId: req.body.postId
+    postId: req.params.postId
   }
-  const comment = await postModel.createComment(query);
+  console.log(query);
+  const comment = await postModel.createCommentByPostId(query);
+  // database query will return null if specified post does not exist
+  if (comment === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.json(comment);
 }
 
 module.exports = {
   getAllPosts,
   getPostByPostId,
-  getPostsByUserId,
   createPost,
   updatePost,
   deletePost,
   publishPost,
   ratePost,
   getCommentsByPostId,
-  createComment
+  createCommentByPostId
 }
