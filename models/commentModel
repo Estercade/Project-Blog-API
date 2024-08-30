@@ -1,17 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-async function createComment(query) {
-  const comment = await prisma.comment.create({
-    data: {
-      content: query.content,
-      authorId: query.authorId,
-      postId: query.postId
-    }
-  })
-  return comment;
-}
-
 async function getCommentsByPostId(query) {
   const comments = await prisma.comment.findMany({
     where: {
@@ -21,19 +10,31 @@ async function getCommentsByPostId(query) {
   return comments;
 }
 
-async function getCommentsByCommentId(query) {
+async function getCommentByCommentId(query) {
   const comment = await prisma.comment.findUnique({
     where: {
       id: query.commentId
+    },
+    select: {
+      id: true,
+      content: true,
+      author: {
+        select: {
+          username: true
+        }
+      },
+      posted: true,
+      lastEdited: true,
+      postId: true,
     }
   })
   return comment;
 }
 
-async function getCommentsByUser(queryUserId) {
+async function getCommentsByUser(query) {
   const comments = await prisma.comment.findMany({
     where: {
-      authorId: queryUserId
+      authorId: query.userId
     }
   })
   return comments;
@@ -53,9 +54,21 @@ async function updateComment(query) {
     data: {
       content: query.content,
       lastEdited: new Date()
+    },
+    select: {
+      id: true,
+      content: true,
+      author: {
+        select: {
+          username: true
+        }
+      },
+      posted: true,
+      lastEdited: true,
+      postId: true,
     }
   })
-  return commupdatedCommentent;
+  return updatedComment;
 }
 
 async function deleteComment(query) {
@@ -85,8 +98,7 @@ async function deleteComment(query) {
 }
 
 module.exports = {
-  createComment,
-  getCommentsByCommentId,
+  getCommentByCommentId,
   getCommentsByPostId,
   getCommentsByUser,
   updateComment,

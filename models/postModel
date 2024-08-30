@@ -10,6 +10,7 @@ async function getAllPosts(query) {
       id: true,
       title: true,
       content: true,
+      published: true,
       publishedAt: true,
       lastEdited: true,
       author: {
@@ -55,7 +56,8 @@ async function getPostByPostId(query) {
               username: true
             }
           },
-          posted: true
+          posted: true,
+          lastEdited: true,
         }
       },
     },
@@ -70,7 +72,7 @@ async function getPostByPostId(query) {
         authorId: true
       }
     })
-    // database query will return "forbidden" if author id does not match current user's id
+    // return "forbidden" if author id does not match current user's id
     if (authorId !== query.postId) {
       return "forbidden";
     }
@@ -91,7 +93,9 @@ async function createPost(query) {
       id: true,
       title: true,
       content: true,
+      published: true,
       publishedAt: true,
+      lastEdited: true,
       author: {
         select: {
           username: true,
@@ -123,7 +127,7 @@ async function updatePost(query) {
       authorId: true
     }
   })
-  // database query will return "forbidden" if author id does not match current user's id
+  // return "forbidden" if author id does not match current user's id
   if (authorId !== query.userId) {
     return "forbidden";
   }
@@ -135,6 +139,23 @@ async function updatePost(query) {
       title: query.title,
       content: query.content,
       lastEdited: new Date()
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      published: true,
+      publishedAt: true,
+      lastEdited: true,
+      author: {
+        select: {
+          username: true,
+        }
+      },
+      averageRating: true,
+      _count: {
+        select: { comments: true },
+      },
     }
   });
   if (updatedPost.published === false && query.published === true) {
@@ -146,6 +167,23 @@ async function updatePost(query) {
         lastEdited: null,
         published: true,
         publishedAt: new Date(),
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        publishedAt: true,
+        lastEdited: true,
+        author: {
+          select: {
+            username: true,
+          }
+        },
+        averageRating: true,
+        _count: {
+          select: { comments: true },
+        },
       }
     })
   }
@@ -161,12 +199,12 @@ async function deletePost(query) {
       authorId: true
     }
   })
-  // if post is not found, return "null"
+  // return null if specified post does not exist
   if (!post) {
     return null;
   }
-  // database query will return "forbidden" if author id does not match current user's id
-  if (post.authorId !== query.postId) {
+  // return "forbidden" if author id does not match current user's id
+  if (post.authorId !== query.userId) {
     return "forbidden";
   }
   await prisma.post.delete({
@@ -177,29 +215,20 @@ async function deletePost(query) {
   return "deleted";
 }
 
-async function publishPost(targetPostId) {
-  const post = await prisma.post.update({
-    where: {
-      id: targetPostId
-    },
-    data: {
-      published: true,
-      publishedAt: new Date(),
-    }
-  })
-  return post;
-}
-
-async function ratePost(targetPostId, updatedRating) {
-  let post = await getPostByPostId(targetPostId);
+async function ratePost(query) {
+  let post = await getPostByPostId(query.postId);
+  // return null if specified post does not exist
+  if (!post) {
+    return null;
+  }
   const updatedPost = await prisma.post.update({
     where: {
-      id: targetPostId
+      id: query.postId
     },
     data: {
-      totalRating: { increment: updatedRating },
+      totalRating: { increment: query.rating },
       ratingCount: { increment: 1 },
-      averageRating: ((post.totalRating + updatedRating) / (post.ratingCount + 1))
+      averageRating: ((post.totalRating + query.rating) / (post.ratingCount + 1))
     }
   })
   return updatedPost;
@@ -213,7 +242,14 @@ async function getCommentsByPostId(query) {
     select: {
       comments: {
         select: {
-          username: true,
+          id: true,
+          content: true,
+          author: {
+            select: {
+              username: true,
+            }
+          },
+          posted: true,
           lastEdited: true
         }
       }
@@ -230,15 +266,16 @@ async function createCommentByPostId(query) {
       postId: query.postId
     },
     select: {
+      id: true,
       content: true,
       author: {
         select: {
           username: true
         }
       },
-      postId: true,
       posted: true,
-      lastEdited: true
+      lastEdited: true,
+      postId: true,
     }
   })
   return comment;
@@ -250,7 +287,6 @@ module.exports = {
   createPost,
   updatePost,
   deletePost,
-  publishPost,
   ratePost,
   getCommentsByPostId,
   createCommentByPostId
