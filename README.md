@@ -13,6 +13,7 @@ The goal of this project is to create a RESTful blog API using Node.js and Expre
 
 ### Usage
 A preview of this app can be access by making HTTP requests to API endpoints via the URL: ```https://blogger.adaptable.app/``` 
+
 Refer to [documentation](DOCS.md) for further details.
 
 ### API Endpoints
