@@ -35,6 +35,16 @@ To access protected routes:
  \*\* - indicates routes that require both authorization and matching user ID
 
 ------------------------------------------------------------------------------------------
+### HTTP Status Codes
+| Status code | Description |
+| --- | --- |
+| 200 | OK - successful HTTP request |
+| 204 | No content - specified resource successfully deleted |
+| 400 | Bad request - required field missing from request body |
+| 401 | Unauthorized - incorrect login information submitted |
+| 403 | Forbidden - unauthorized access attempted |
+| 404 | Not found - specified resource unable to be located |
+------------------------------------------------------------------------------------------
 ### Log in<a name="login"></a>
 Returns a JWT which expires after 3 hours and the username of the logged in user. JWT must be attached to authorization header to access protected routes. See <a href="#usage">Usage</a> for further instructions.
 * Required fields: 
@@ -45,16 +55,15 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     ```POST``` ```https://blogger.adaptable.app/login```
     ```json
     {
-        username: "rick",
-        password: "password",
-        email: "rick@example.com"
+        "username": "kyle",
+        "password": "password",
     }
     ```
 * Example response:
     ```json
     {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjNjM4ZTEzYi0yNTdkLTQwOTQtYjBlOC0xNjYxMmVlMDk4YmEiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzI0OTYxNzEwLCJleHAiOjE3MjQ5NzI1MTB9.ja4zfGiGa6aldqJXShwtous1BhKLK50BAQnon79wz60",
-        "currentUser": "rick"
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1M2ZhNzFkZC0zZDZhLTQzZTAtYWYyNC0yYTlhNDRiNTUxZmEiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzI1MDUwMDkxLCJleHAiOjE3MjUwNjA4OTF9.5_41sJ9JIjKcVQoX7AoPUN4CpGHNcxn6l10kfbL26fo",
+        "currentUser": "kyle"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -74,18 +83,10 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     ```json
     [
         {
-            "username": "rick",
-            "_count": {
-                "posts": 6,
-                "comments": 4
-            },
-            "role": "MEMBER"
-        },
-        {
             "username": "kyle",
             "_count": {
-                "posts": 1,
-                "comments": 1
+                "posts": 4,
+                "comments": 2
             },
             "role": "MEMBER"
         },
@@ -112,16 +113,16 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 
     ```json
     {
-        username: "rick",
-        password: "password",
-        email: "rick@example.com"
+        "username": "kyle",
+        "password": "password",
+        "email": "kyle@example.com"
     }
     ```
 * Example response:
     ```json
     {
-        "username": "rick",
-        "email": "rick@example.com",
+        "username": "kyle",
+        "email": "kyle@example.com",
         "role": "MEMBER"
     }
     ```
@@ -130,38 +131,38 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 ### Retrieve a specific user's information<a name="retrieve-user"></a>
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/users/rick```
+    ```GET``` ```https://blogger.adaptable.app/users/kyle```
 * Example response:
     ```json
     {
-        "username": "rick",
+        "username": "kyle",
         "posts": [
             {
-                "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
-                "title": "Maecenas sapien augue",
-                "content": "Suspendisse eleifend, libero ac condimentum scelerisque, mauris felis vulputate mi, et semper lorem nulla eleifend sapien. Integer blandit convallis tincidunt.",
-                "publishedAt": "2024-08-28T22:59:08.926Z",
+                "id": "0acb7cee-c693-4ec3-af43-5e41df7c5fdf",
+                "title": "Duis at efficitur tortor.",
+                "content": "Vestibulum pulvinar orci felis, et accumsan lorem suscipit eget. Sed interdum sapien ac orci vehicula, in commodo tortor scelerisque.",
+                "publishedAt": "2024-08-28T17:08:16.261Z",
                 "lastEdited": null,
                 "author": {
-                    "username": "rick"
+                    "username": "kyle"
                 },
                 "averageRating": null,
                 "_count": {
-                    "comments": 2
+                    "comments": 0
                 }
             }
         ],
         "comments": [
             {
-                "id": "feaede6f-41d9-4b7d-8ac4-13822ea967ce",
-                "content": "Maecenas ac tincidunt arcu. Aliquam non metus ipsum.",
-                "posted": "2024-08-28T21:46:03.512Z",
-                "lastEdited": "2024-08-28T22:01:01.814Z",
+                "id": "c3589309-1ba1-4658-b14f-81554df4242d",
+                "content": "Vestibulum euismod est nunc, quis iaculis felis sodales et.",
+                "posted": "2024-08-28T16:41:31.552Z",
+                "lastEdited": null,
                 "author": {
-                    "username": "rick"
+                    "username": "kyle"
                 },
                 "post": {
-                    "id": "d3b06afd-081d-4546-b7d2-3b3649f2884f",
+                    "id": "b394201a-ad4f-4022-9aea-6efbd1c458f1",
                     "title": "My first post"
                 }
             }
@@ -181,17 +182,17 @@ Requires user to be logged in and to match the specified user
 
     ```json
     {
-        username: "ricky",
-        password: "password123",
-        email: "rick92@example.com"
+        "username": "kyle",
+        "password": "password123",
+        "email": "kyle12@example.com"
     }
     ```
 * Example response:
     ```json
     {
-        username: "ricky",
-        password: "password123",
-        email: "rick92@example.com"
+        "username": "kyle",
+        "email": "kyle12@example.com",
+        "role": "MEMBER"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -217,40 +218,40 @@ Requires user to be logged in and to match the specified user
     * ```desc``` - descending order
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/posts?sort=title&order=desc```
+    ```GET``` ```https://blogger.adaptable.app/users/kyle/posts?sort=title&order=desc```
 * Example response:
     ```json
     [
         {
-            "id": "f1cf9b5d-3ccc-4f7c-a2d6-5348808e83b0",
-            "title": "Ut cursus elit sit amet sem scelerisque interdum",
-            "content": "Vestibulum ultricies dui a velit finibus molestie. Vivamus et ornare nibh, ut consequat quam. Vivamus non aliquet justo, et volutpat dui. Donec luctus vitae elit sed molestie.",
+            "id": "976a7d02-48c5-4614-be61-38ee6b738b5b",
+            "title": "Phasellus eget lectus at sapien",
+            "content": "Maecenas feugiat sagittis sollicitudin. Cras nisl ligula, egestas sit amet rutrum ac, porttitor at turpis.",
             "published": true,
-            "publishedAt": "2024-08-28T18:52:56.296Z",
-            "lastEdited": null,
+            "publishedAt": "2024-08-30T20:40:24.468Z",
+            "lastEdited": "2024-08-30T20:44:16.436Z",
             "author": {
-                "username": "rick"
-            },
-            "averageRating": null,
-            "ratingCount": 0,
-            "_count": {
-                "comments": 0
-            }
-        },
-        {
-            "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-            "title": "Nunc tortor dui, semper vitae",
-            "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
-            "published": true,
-            "publishedAt": "2024-08-30T14:36:46.192Z",
-            "lastEdited": "2024-08-30T17:40:00.927Z",
-            "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "averageRating": null,
             "ratingCount": 0,
             "_count": {
                 "comments": 1
+            }
+        },
+        {
+            "id": "0acb7cee-c693-4ec3-af43-5e41df7c5fdf",
+            "title": "Duis at efficitur tortor.",
+            "content": "Vestibulum pulvinar orci felis, et accumsan lorem suscipit eget. Sed interdum sapien ac orci vehicula, in commodo tortor scelerisque.",
+            "published": true,
+            "publishedAt": "2024-08-28T17:08:16.261Z",
+            "lastEdited": null,
+            "author": {
+                "username": "kyle"
+            },
+            "averageRating": null,
+            "ratingCount": 0,
+            "_count": {
+                "comments": 0
             }
         }
     ]
@@ -265,34 +266,34 @@ Requires user to be logged in and to match the specified user
     * ```desc``` - descending order
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/comments?sort=date&order=asc```
+    ```GET``` ```https://blogger.adaptable.app/users/kyle/comments?sort=date&order=asc```
 * Example response:
     ```json
     [
         {
-            "id": "ca1477b6-84da-49f1-8535-b1897ce5f4a7",
-            "content": "Vellentesque elementum maximus augue ullamcorper semper.",
-            "posted": "2024-08-28T23:11:14.502Z",
+            "id": "c3589309-1ba1-4658-b14f-81554df4242d",
+            "content": "Vestibulum euismod est nunc, quis iaculis felis sodales et.",
+            "posted": "2024-08-28T16:41:31.552Z",
             "lastEdited": null,
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "post": {
-                "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
-                "title": "Maecenas sapien augue"
+                "id": "b394201a-ad4f-4022-9aea-6efbd1c458f1",
+                "title": "My first post"
             }
         },
         {
-            "id": "097dab0f-e454-4d0d-b700-620bb3ada4d5",
-            "content": "Morbi molestie dui porttitor tortor tempor, ac pulvinar sapien aliquet.",
-            "posted": "2024-08-30T16:56:00.810Z",
-            "lastEdited": null,
+            "id": "790b1c85-437c-41dc-919a-22a4adb0d078",
+            "content": "Suspendisse auctor nulla eleifend semper aliquam.",
+            "posted": "2024-08-30T20:42:25.363Z",
+            "lastEdited": "2024-08-30T20:46:32.440Z",
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "post": {
-                "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
-                "title": "Maecenas sapien augue"
+                "id": "976a7d02-48c5-4614-be61-38ee6b738b5b",
+                "title": "Phasellus eget lectus at sapien"
             }
         }
     ]
@@ -302,26 +303,42 @@ Requires user to be logged in and to match the specified user
 ### Retrieve a user's drafts only<a name="retrieve-user-drafts"></a>
 Requires user to be logged in and to match the specified user (drafts are hidden to the public)
 * Sorting options (sorts drafts by date edited if sorting option is unspecified or invalid):
-    * ```date``` - sort by date last edited
+    * ```edited``` - sort by date last edited
     * ```created``` - sort by date created
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/drafts```
+    ```GET``` ```https://blogger.adaptable.app/users/kyle/drafts?sort=created&order=asc```
 * Example response:
     ```json
     [
         {
-            "id": "d3e32420-7667-4e63-957d-7988e2ea9298",
-            "title": "Cras ac massa orci",
-            "content": "Suspendisse sit amet ultricies ex, non imperdiet urna. Ut feugiat ultricies purus a varius. Curabitur tempor est sed enim euismod, id euismod tortor dictum.",
+            "id": "02eb7078-ed5f-4b48-8925-320ced839d2c",
+            "title": "My first post",
+            "content": "Lorem ipsum dolor sit amet.",
             "published": false,
-            "createdAt": "2024-08-28T19:05:56.120Z",
-            "lastEdited": "2024-08-28T19:06:21.881Z",
+            "createdAt": "2024-08-28T16:41:30.970Z",
+            "lastEdited": null,
             "author": {
-                "username": "rick"
+                "username": "kyle"
+            },
+            "averageRating": null,
+            "ratingCount": 0,
+            "_count": {
+                "comments": 0
+            }
+        },
+        {
+            "id": "7fff47ce-6ba0-4da1-b7a0-932b84037110",
+            "title": "Donec commodo finibus luctus",
+            "content": "Donec aliquet et dui in vehicula. Nullam hendrerit pretium lacus, quis ultrices ante tristique et.",
+            "published": false,
+            "createdAt": "2024-08-30T20:38:32.881Z",
+            "lastEdited": null,
+            "author": {
+                "username": "kyle"
             },
             "averageRating": null,
             "ratingCount": 0,
@@ -350,14 +367,14 @@ Requires user to be logged in and to match the specified user (drafts are hidden
     ```json
     [
         {
-            "id": "937aec0d-ba95-4550-8ea7-8f6d96529379",
-            "title": "Cras ut ligula dui",
-            "content": "Nam sapien metus, mollis ac viverra ut, rhoncus ac metus. Duis dapibus, ligula eu pellentesque volutpat, eros tellus dignissim orci, fringilla lacinia dolor metus ut odio.",
+            "id": "0acb7cee-c693-4ec3-af43-5e41df7c5fdf",
+            "title": "Duis at efficitur tortor.",
+            "content": "Vestibulum pulvinar orci felis, et accumsan lorem suscipit eget. Sed interdum sapien ac orci vehicula, in commodo tortor scelerisque.",
             "published": true,
-            "publishedAt": "2024-08-29T02:30:34.303Z",
+            "publishedAt": "2024-08-28T17:08:16.261Z",
             "lastEdited": null,
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "averageRating": null,
             "_count": {
@@ -365,14 +382,14 @@ Requires user to be logged in and to match the specified user (drafts are hidden
             }
         },
         {
-            "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-            "title": "Etiam porttitor, dui in egestas fermentum",
-            "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
+            "id": "976a7d02-48c5-4614-be61-38ee6b738b5b",
+            "title": "Phasellus eget lectus at sapien",
+            "content": "Maecenas feugiat sagittis sollicitudin. Cras nisl ligula, egestas sit amet rutrum ac, porttitor at turpis.",
             "published": true,
-            "publishedAt": "2024-08-30T14:36:46.192Z",
-            "lastEdited": "2024-08-30T14:41:00.211Z",
+            "publishedAt": "2024-08-30T20:40:24.468Z",
+            "lastEdited": "2024-08-30T20:44:16.436Z",
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "averageRating": null,
             "_count": {
@@ -392,24 +409,24 @@ Requires user to be logged in
     * ```published: {{boolean}}```
 * Example request:
     ```POST``` ```https://blogger.adaptable.app/posts```
-    ```
+    ```json
     {
-        "title": "Etiam porttitor, dui in egestas fermentum",
-        "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
+        "title": "Aenean mauris diam",
+        "content": "Vivamus porta risus in porttitor lacinia. Mauris a diam in arcu ullamcorper placerat dignissim sit amet orci. Curabitur luctus justo urna, a suscipit urna semper sit amet.",
         "published": true
     }
     ```
 * Example response:
     ```json
     {
-        "id": "ec1cd846-5f5b-4d6e-b382-cf9319216d1a",
-        "title": "Etiam porttitor, dui in egestas fermentum",
-        "content": "Suspendisse auctor nulla eleifend semper aliquam.",
+        "id": "976a7d02-48c5-4614-be61-38ee6b738b5b",
+        "title": "Aenean mauris diam",
+        "content": "Vivamus porta risus in porttitor lacinia. Mauris a diam in arcu ullamcorper placerat dignissim sit amet orci. Curabitur luctus justo urna, a suscipit urna semper sit amet.",
         "published": true,
-        "publishedAt": "2024-08-30T17:34:44.228Z",
+        "publishedAt": "2024-08-30T20:40:24.468Z",
         "lastEdited": null,
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
         "averageRating": null,
         "ratingCount": 0,
@@ -421,30 +438,30 @@ Requires user to be logged in
 ### Retrieve a specific post<a name="retrieve-post"></a>
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    ```GET``` ```https://blogger.adaptable.app/posts/976a7d02-48c5-4614-be61-38ee6b738b5b/```
 * Example response:
     ```json
     {
-        "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-        "title": "Etiam porttitor, dui in egestas fermentum",
-        "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
+        "id": "976a7d02-48c5-4614-be61-38ee6b738b5b",
+        "title": "Aenean mauris diam",
+        "content": "Vivamus porta risus in porttitor lacinia. Mauris a diam in arcu ullamcorper placerat dignissim sit amet orci. Curabitur luctus justo urna, a suscipit urna semper sit amet.",
         "published": true,
-        "publishedAt": "2024-08-30T14:36:46.192Z",
-        "lastEdited": "2024-08-30T14:41:00.211Z",
+        "publishedAt": "2024-08-30T20:40:24.468Z",
+        "lastEdited": null,
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
         "averageRating": null,
         "ratingCount": 0,
         "comments": [
             {
-                "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
-                "content": "Suspendisse auctor nulla eleifend semper aliquam.",
+                "id": "790b1c85-437c-41dc-919a-22a4adb0d078",
+                "content": "Donec aliquet et dui in vehicula.",
                 "author": {
-                    "username": "rick"
+                    "username": "kyle"
                 },
-                "posted": "2024-08-30T16:56:43.804Z",
-                "lastEdited": "2024-08-30T17:10:53.553Z"
+                "posted": "2024-08-30T20:42:25.363Z",
+                "lastEdited": null
             }
         ]
     }
@@ -460,24 +477,24 @@ Requires user to be logged in and to match the post's author
     * ```published: {{boolean}}``` (previously published posts cannot be unpublished)
 * Example request:
     
-    ```PUT``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    ```PUT``` ```https://blogger.adaptable.app/posts/976a7d02-48c5-4614-be61-38ee6b738b5b/```
     ```json
     {
-        "title": "Nunc tortor dui, semper vitae",
-        "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor."
+        "title": "Phasellus eget lectus at sapien",
+        "content": "Maecenas feugiat sagittis sollicitudin. Cras nisl ligula, egestas sit amet rutrum ac, porttitor at turpis."
     }
     ```
 * Example response:
     ```json
     {
-        "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-        "title": "Nunc tortor dui, semper vitae",
-        "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
+        "id": "976a7d02-48c5-4614-be61-38ee6b738b5b",
+        "title": "Phasellus eget lectus at sapien",
+        "content": "Maecenas feugiat sagittis sollicitudin. Cras nisl ligula, egestas sit amet rutrum ac, porttitor at turpis.",
         "published": true,
-        "publishedAt": "2024-08-30T14:36:46.192Z",
-        "lastEdited": "2024-08-30T17:40:00.927Z",
+        "publishedAt": "2024-08-30T20:40:24.468Z",
+        "lastEdited": "2024-08-30T20:44:16.436Z",
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
         "averageRating": null,
         "_count": {
@@ -500,27 +517,18 @@ Requires user to be logged in and to match the post's author
 ### Retrieve a post's comments<a name="retrieve-post-comments"></a>
 * Example request:
     
-    ```GET```  ```https://blogger.adaptable.app/posts/674997d3-b1f1-4eb7-bbf5-19f96d461e2a/comments```
+    ```GET```  ```https://blogger.adaptable.app/posts/976a7d02-48c5-4614-be61-38ee6b738b5b/comments```
 * Example response:
  
     ```
     [
         {
-            "id": "ca1477b6-84da-49f1-8535-b1897ce5f4a7",
-            "content": "Vellentesque elementum maximus augue ullamcorper semper.",
+            "id": "790b1c85-437c-41dc-919a-22a4adb0d078",
+            "content": "Donec aliquet et dui in vehicula.",
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
-            "posted": "2024-08-28T23:11:14.502Z",
-            "lastEdited": null
-        },
-        {
-            "id": "097dab0f-e454-4d0d-b700-620bb3ada4d5",
-            "content": "Morbi molestie dui porttitor tortor tempor, ac pulvinar sapien aliquet.",
-            "author": {
-                "username": "rick"
-            },
-            "posted": "2024-08-30T16:56:00.810Z",
+            "posted": "2024-08-30T20:42:25.363Z",
             "lastEdited": null
         }
     ]
@@ -533,19 +541,19 @@ Requires user to be logged in
     * ```content: {{string}}```
 * Example request:
     
-    ```POST``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    ```POST``` ```https://blogger.adaptable.app/posts/976a7d02-48c5-4614-be61-38ee6b738b5b/comments```
     
 * Example response:
     ```json
     {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
-        "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+        "id": "790b1c85-437c-41dc-919a-22a4adb0d078",
+        "content": "Donec aliquet et dui in vehicula.",
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
-        "posted": "2024-08-30T16:56:43.804Z",
+        "posted": "2024-08-30T20:42:25.363Z",
         "lastEdited": null,
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+        "postId": "976a7d02-48c5-4614-be61-38ee6b738b5b"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -553,19 +561,19 @@ Requires user to be logged in
 ### Retrieve a comment<a name="retrieve-comment"></a>
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
+    ```GET``` ```https://blogger.adaptable.app/comments/790b1c85-437c-41dc-919a-22a4adb0d078```
     
 * Example response:
     ```json
     {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
-        "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+        "id": "790b1c85-437c-41dc-919a-22a4adb0d078",
+        "content": "Donec aliquet et dui in vehicula.",
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
-        "posted": "2024-08-30T16:56:43.804Z",
+        "posted": "2024-08-30T20:42:25.363Z",
         "lastEdited": null,
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+        "postId": "976a7d02-48c5-4614-be61-38ee6b738b5b"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -585,14 +593,14 @@ Requires user to be logged in and to match the comment's author
 * Example response:
     ```json
     {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
+        "id": "790b1c85-437c-41dc-919a-22a4adb0d078",
         "content": "Suspendisse auctor nulla eleifend semper aliquam.",
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
-        "posted": "2024-08-30T16:56:43.804Z",
-        "lastEdited": "2024-08-30T17:10:53.553Z",
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+        "posted": "2024-08-30T20:42:25.363Z",
+        "lastEdited": "2024-08-30T20:46:32.440Z",
+        "postId": "976a7d02-48c5-4614-be61-38ee6b738b5b"
     }
     ```
 ##### <a href="#top"> Return to top</a>

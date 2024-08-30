@@ -9,7 +9,8 @@ router.get("/", postController.getAllPosts);
 router.get("/:postId", postController.getPostByPostId);
 router.put("/:postId", auth.authenticate, postController.updatePost);
 router.delete("/:postId", auth.authenticate, postController.deletePost);
-router.patch("/:postId/rating", auth.authenticate, postController.ratePost);
+router.post("/:postId/rating", auth.authenticate, postController.ratePost);
+router.put("/:postId/rating", auth.authenticate, postController.ratePost);
 router.get("/:postId/comments", postController.getCommentsByPostId);
 router.post("/:postId/comments", auth.authenticate, postController.createCommentByPostId);
 

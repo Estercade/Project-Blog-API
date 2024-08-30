@@ -2,6 +2,15 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function createUser(query) {
+  const match = await prisma.user.findUnique({
+    where: {
+      username: query.username,
+    }
+  });
+  // return "taken" if username is already taken
+  if (match) {
+    return "taken";
+  }
   const user = await prisma.user.create({
     data: {
       username: query.username,
@@ -50,13 +59,13 @@ async function getUserByUsername(query) {
           title: true,
           content: true,
           publishedAt: true,
-          lastEdited: true,
+          lastEditedAt: true,
           author: {
             select: {
               username: true
             }
           },
-          averageRating: true,
+          totalRating: true,
           _count: {
             select: { comments: true },
           },
@@ -66,8 +75,8 @@ async function getUserByUsername(query) {
         select: {
           id: true,
           content: true,
-          posted: true,
-          lastEdited: true,
+          postedAt: true,
+          lastEditedAt: true,
           author: {
             select: {
               username: true
@@ -93,8 +102,8 @@ async function updateUser(query) {
       username: query.username
     }
   })
-  // if username is already taken and current userId does not match 
-  // the userId associated with that username, return "taken" string
+  // return "taken" string if username is already taken 
+  // and current userId does not match the userId associated with that username
   if (tempUser && tempUser.id !== query.userId) {
     return "taken";
   }
@@ -140,14 +149,13 @@ async function getPostsByUsername(query) {
           content: true,
           published: true,
           publishedAt: true,
-          lastEdited: true,
+          lastEditedAt: true,
           author: {
             select: {
               username: true,
             }
           },
-          averageRating: true,
-          ratingCount: true,
+          totalRating: true,
           _count: {
             select: { comments: true },
           },
@@ -170,8 +178,8 @@ async function getCommentsByUsername(query) {
         select: {
           id: true,
           content: true,
-          posted: true,
-          lastEdited: true,
+          postedAt: true,
+          lastEditedAt: true,
           author: {
             select: {
               username: true
@@ -218,14 +226,13 @@ async function getDraftsByUsername(query) {
           content: true,
           published: true,
           createdAt: true,
-          lastEdited: true,
+          lastEditedAt: true,
           author: {
             select: {
               username: true,
             }
           },
-          averageRating: true,
-          ratingCount: true,
+          totalRating: true,
           _count: {
             select: { comments: true },
           },

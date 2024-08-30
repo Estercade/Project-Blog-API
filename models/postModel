@@ -12,13 +12,13 @@ async function getAllPosts(query) {
       content: true,
       published: true,
       publishedAt: true,
-      lastEdited: true,
+      lastEditedAt: true,
       author: {
         select: {
           username: true,
         }
       },
-      averageRating: true,
+      totalRating: true,
       _count: {
         select: { comments: true },
       },
@@ -39,14 +39,13 @@ async function getPostByPostId(query) {
       content: true,
       published: true,
       publishedAt: true,
-      lastEdited: true,
+      lastEditedAt: true,
       author: {
         select: {
           username: true,
         }
       },
-      averageRating: true,
-      ratingCount: true,
+      totalRating: true,
       comments: {
         select: {
           id: true,
@@ -56,14 +55,18 @@ async function getPostByPostId(query) {
               username: true
             }
           },
-          posted: true,
-          lastEdited: true,
+          postedAt: true,
+          lastEditedAt: true,
         }
       },
     },
   })
+  // if post cannot be found, return null
+  if (!post) {
+    return null;
+  }
   // if post is a draft, compare current user's id to authorId
-  if (post && !post.published) {
+  if (!post.published) {
     const { authorId } = await prisma.post.findUnique({
       where: {
         id: query.postId
@@ -73,7 +76,7 @@ async function getPostByPostId(query) {
       }
     })
     // return "forbidden" if author id does not match current user's id
-    if (authorId !== query.postId) {
+    if (authorId !== query.userId) {
       return "forbidden";
     }
   }
@@ -95,14 +98,13 @@ async function createPost(query) {
       content: true,
       published: true,
       publishedAt: true,
-      lastEdited: true,
+      lastEditedAt: true,
       author: {
         select: {
           username: true,
         }
       },
-      averageRating: true,
-      ratingCount: true,
+      totalRating: true,
       comments: {
         select: {
           content: true,
@@ -115,6 +117,8 @@ async function createPost(query) {
       },
     },
   })
+  const rating = post.rating.reduce((sum, { rating }) => sum + rating, 0,);
+  post.rating = rating;
   return post;
 }
 
@@ -138,7 +142,7 @@ async function updatePost(query) {
     data: {
       title: query.title,
       content: query.content,
-      lastEdited: new Date()
+      lastEditedAt: new Date()
     },
     select: {
       id: true,
@@ -146,13 +150,13 @@ async function updatePost(query) {
       content: true,
       published: true,
       publishedAt: true,
-      lastEdited: true,
+      lastEditedAt: true,
       author: {
         select: {
           username: true,
         }
       },
-      averageRating: true,
+      totalRating: true,
       _count: {
         select: { comments: true },
       },
@@ -164,7 +168,7 @@ async function updatePost(query) {
         id: query.postId
       },
       data: {
-        lastEdited: null,
+        lastEditedAt: null,
         published: true,
         publishedAt: new Date(),
       },
@@ -174,13 +178,13 @@ async function updatePost(query) {
         content: true,
         published: true,
         publishedAt: true,
-        lastEdited: true,
+        lastEditedAt: true,
         author: {
           select: {
             username: true,
           }
         },
-        averageRating: true,
+        totalRating: true,
         _count: {
           select: { comments: true },
         },
@@ -216,19 +220,75 @@ async function deletePost(query) {
 }
 
 async function ratePost(query) {
-  let post = await getPostByPostId(query.postId);
+  // search to see if post exists
+  let post = await prisma.post.findUnique({
+    where: {
+      id: query.postId,
+    }
+  });
   // return null if specified post does not exist
   if (!post) {
     return null;
   }
+  // search if the user has previously rated this post
+  const match = await prisma.rating.findMany({
+    where: {
+      userId: query.userId,
+      postId: query.postId
+    }
+  })
+  // if user has never rated this post, create a new rating
+  if (!match) {
+    const rating = prisma.rating.create({
+      data: {
+        userId: query.userId,
+        postId: query.postId,
+        rating: query.rating,
+      },
+      select: {
+        rating: true,
+        user: {
+          select: {
+            username: true,
+          }
+        },
+        postId: true,
+      }
+    })
+    return rating;
+    // if user has previously rated this post, update the given rating
+  } else {
+    const rating = await prisma.rating.update({
+      where: {
+        id: match[0].id,
+      },
+      data: {
+        rating: query.rating,
+      }
+    })
+    return rating;
+  }
+}
+
+async function updatePostRating(query) {
+  // retrieve the post
+  const post = await prisma.post.findUnique({
+    where: {
+      id: query.postId,
+    },
+    select: {
+      ratings: true,
+    }
+  })
+  // iterate through and sum the ratings
+  const newTotalRating = post.ratings.reduce((sum, { rating }) => sum + rating, 0);
+  // update the post's totalRating
   const updatedPost = await prisma.post.update({
     where: {
-      id: query.postId
+      id: query.postId,
     },
     data: {
-      totalRating: { increment: query.rating },
-      ratingCount: { increment: 1 },
-      averageRating: ((post.totalRating + query.rating) / (post.ratingCount + 1))
+      totalRating: newTotalRating,
     }
   })
   return updatedPost;
@@ -249,8 +309,8 @@ async function getCommentsByPostId(query) {
               username: true,
             }
           },
-          posted: true,
-          lastEdited: true
+          postedAt: true,
+          lastEditedAt: true
         }
       }
     }
@@ -273,8 +333,8 @@ async function createCommentByPostId(query) {
           username: true
         }
       },
-      posted: true,
-      lastEdited: true,
+      postedAt: true,
+      lastEditedAt: true,
       postId: true,
     }
   })
@@ -288,6 +348,7 @@ module.exports = {
   updatePost,
   deletePost,
   ratePost,
+  updatePostRating,
   getCommentsByPostId,
   createCommentByPostId
 }

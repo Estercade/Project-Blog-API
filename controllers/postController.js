@@ -12,7 +12,7 @@ async function getAllPosts(req, res) {
         sort["title"] = (req.query.order || "asc");
         break;
       case "rating":
-        sort["averageRating"] = (req.query.order || "asc");
+        sort["rating"] = (req.query.order || "asc");
         break;
       case "comments":
         sort["comments"] = { "_count": (req.query.order || "asc") };
@@ -29,13 +29,13 @@ async function getAllPosts(req, res) {
 }
 
 async function getPostByPostId(req, res) {
-  const query = {
-    userId: undefined,
-    postId: req.params.postId,
-  }
   // retrieve current user's id
   if (req.headers.authorization) {
     currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
+  }
+  const query = {
+    userId: req.headers.authorization ? currentUserId : undefined,
+    postId: req.params.postId,
   }
   const post = await postModel.getPostByPostId(query);
   // database query will return invalid if author id does not match current user's id 
@@ -109,24 +109,31 @@ async function deletePost(req, res) {
   if (post === "forbidden") {
     return res.status(403).json("You do not have access to this file.");
   }
-  res.status(204).json("Post has been deleted");
+  res.status(204).json();
 }
 
 async function ratePost(req, res) {
+  // retrieve current user's id
+  const currentUserId = jwt.decode((req.headers.authorization.split(' ')[1]), { complete: true }).payload.userId;
   // if data is missing from request body, return HTTP error
   if (!req.body.rating) {
     return res.status(400).json("Required information in request body is missing.");
   }
-  const query = {
-    postId: req.params.postId,
-    rating: Number(req.body.rating),
+  if (req.body.rating > 1 | req.body.rating < -1) {
+    return res.status(400).json("Invalid rating.")
   }
-  const rating = Number(req.body.rating);
-  const post = await postModel.ratePost(query);
+  const query = {
+    userId: currentUserId,
+    rating: Number(req.body.rating),
+    postId: req.params.postId,
+  }
+  const rating = await postModel.ratePost(query);
   // database query will return null if specified post does not exist
-  if (post === null) {
+  if (rating === null) {
     return res.status(404).json("Resource not found.");
   }
+  // update the post's rating if rating has been performed
+  const post = await postModel.updatePostRating(query);
   res.json(post);
 }
 

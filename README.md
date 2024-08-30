@@ -19,7 +19,7 @@ Refer to [documentation](DOCS.md) for further details.
 | Endpoint | Method | Description |
 | --- | --- | --- |
 | ```/login``` | ```POST``` |  Log in to an existing account |
-| ```/users``` | ```GET``` | sers">Retrieve all user accounts |
+| ```/users``` | ```GET``` | Retrieve all user accounts |
 | ```/users``` | ```POST``` | Create a new user account |
 | ```/users/:username``` | ```GET``` | Retrieve user account information by username
 | ```/users/:username``` | ```PUT**``` | Update user account information by username |

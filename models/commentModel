@@ -17,14 +17,15 @@ async function getCommentByCommentId(query) {
     },
     select: {
       id: true,
+      totalRating: true,
       content: true,
       author: {
         select: {
           username: true
         }
       },
-      posted: true,
-      lastEdited: true,
+      postedAt: true,
+      lastEditedAt: true,
       postId: true,
     }
   })
@@ -53,18 +54,19 @@ async function updateComment(query) {
     },
     data: {
       content: query.content,
-      lastEdited: new Date()
+      lastEditedAt: new Date()
     },
     select: {
       id: true,
+      totalRating: true,
       content: true,
       author: {
         select: {
           username: true
         }
       },
-      posted: true,
-      lastEdited: true,
+      postedAt: true,
+      lastEditedAt: true,
       postId: true,
     }
   })
@@ -97,10 +99,100 @@ async function deleteComment(query) {
   return "deleted";
 }
 
+async function rateComment(query) {
+  // search to see if comment exists
+  let comment = await prisma.comment.findUnique({
+    where: {
+      id: query.commentId,
+    }
+  });
+  // return null if specified comment does not exist
+  if (!comment) {
+    return null;
+  }
+  // search if the user has previously rated this comment
+  const match = await prisma.rating.findMany({
+    where: {
+      userId: query.userId,
+      commentId: query.commentId
+    }
+  })
+  // if user has never rated this comment, create a new rating
+  if (match.length < 1) {
+    const rating = prisma.rating.create({
+      data: {
+        userId: query.userId,
+        commentId: query.commentId,
+        rating: query.rating,
+      },
+      select: {
+        rating: true,
+        user: {
+          select: {
+            username: true,
+          }
+        },
+        commentId: true,
+      }
+    })
+    return rating;
+    // if user has previously rated this comment, update the given rating
+  } else {
+    const rating = await prisma.rating.update({
+      where: {
+        id: match[0].id,
+      },
+      data: {
+        rating: query.rating,
+      }
+    })
+    return rating;
+  }
+}
+
+async function updateCommentRating(query) {
+  // retrieve the comment
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: query.commentId,
+    },
+    select: {
+      ratings: true,
+    }
+  })
+  // iterate through and sum the ratings
+  const newTotalRating = comment.ratings.reduce((sum, { rating }) => sum + rating, 0);
+  // update the comment's totalRating
+  const updatedPost = await prisma.comment.update({
+    where: {
+      id: query.commentId,
+    },
+    data: {
+      totalRating: newTotalRating,
+    },
+    select: {
+      id: true,
+      totalRating: true,
+      content: true,
+      author: {
+        select: {
+          username: true
+        }
+      },
+      postedAt: true,
+      lastEditedAt: true,
+      postId: true,
+    }
+  })
+  return updatedPost;
+}
+
 module.exports = {
   getCommentByCommentId,
   getCommentsByPostId,
   getCommentsByUser,
   updateComment,
-  deleteComment
+  deleteComment,
+  rateComment,
+  updateCommentRating
 }

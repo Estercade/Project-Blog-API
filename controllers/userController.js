@@ -4,24 +4,21 @@ const bcrypt = require("bcryptjs");
 
 async function createUser(req, res, next) {
   if (!req.body.username | !req.body.email | !req.body.password) {
-    return res.status(204).json("Please complete required fields.");
+    return res.status(400).json("Please complete required fields.");
   } else if (req.body.password.length < 5) {
     return res.status(403).json("Password must be at least 5 characters long.")
   }
-  const match = await userModel.getUserByUsername(req.body.username);
-  if (match) {
-    return res.status(403).json("Username already exists.");
-  } else {
-    rte
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const query = {
-      username: req.body.username,
-      email: req.body.email,
-      password: hashedPassword
-    }
-    const user = await userModel.createUser(query);
-    res.json(user);
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  const query = {
+    username: req.body.username,
+    email: req.body.email,
+    password: hashedPassword
   }
+  const user = await userModel.createUser(query);
+  if (user === "taken") {
+    return res.status(403).json("Username already exists.");
+  }
+  res.json(user);
 }
 
 async function getAllUsers(req, res) {
@@ -59,7 +56,7 @@ async function getUserByUsername(req, res) {
 
 async function updateUser(req, res, next) {
   if (!req.body.username | !req.body.email | !req.body.password) {
-    return res.status(204).json("Please complete required fields.");
+    return res.status(400).json("Please complete required fields.");
   }
   if (req.body.password.length < 5) {
     return res.status(403).json("Password must be at least 5 characters long.")
@@ -89,7 +86,7 @@ async function deleteUser(req, res) {
     return res.status(403).json("Forbidden");
   }
   await userModel.deleteUser(req.params.userId);
-  res.json("User deleted");
+  res.status(204).json();
 }
 
 async function getPostsByUsername(req, res) {
@@ -103,7 +100,7 @@ async function getPostsByUsername(req, res) {
         sort["title"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
       case "rating":
-        sort["averageRating"] = (req.query.order === "desc" ? "desc" : "asc");
+        sort["rating"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
       case "comments":
         sort["comments"] = { "_count": (req.query.order === "desc" ? "desc" : "asc") };
@@ -137,8 +134,8 @@ async function getDraftsByUsername(req, res) {
   if (req.query.sort) {
     var sort = {};
     switch (req.query.sort) {
-      case "date":
-        sort["lastEdited"] = (req.query.order === "desc" ? "desc" : "asc");
+      case "edited":
+        sort["lastEditedAt"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
       case "created":
         sort["createdAt"] = (req.query.order === "desc" ? "desc" : "asc");
@@ -150,7 +147,7 @@ async function getDraftsByUsername(req, res) {
   const query = {
     userId: currentUserId,
     username: req.params.username,
-    sort: ((sort || { "lastEdited": "desc" }))
+    sort: ((sort || { "lastEditedAt": "desc" }))
   }
   const drafts = await userModel.getDraftsByUsername(query);
   if (drafts === "forbidden") {

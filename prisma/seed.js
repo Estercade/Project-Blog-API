@@ -11,7 +11,7 @@ async function main() {
       username: "kyle",
       password: "password",
       email: "kyle@example.com",
-      role: "MEMBER",
+      role: "USER",
       posts: {
         create: {
           title: "My first post",
@@ -30,7 +30,7 @@ async function main() {
       username: "bob",
       password: "password",
       email: "bob@example.com",
-      role: "MEMBER",
+      role: "USER",
       posts: {
         create: {
           title: "My first post",
