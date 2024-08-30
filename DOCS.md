@@ -45,9 +45,9 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     ```POST``` ```https://blogger.adaptable.app/login```
     ```json
     {
-        username: "rick",
-        password: "password",
-        email: "rick@example.com"
+        "username": "rick",
+        "password": "password",
+        "email": "rick@example.com"
     }
     ```
 * Example response:
@@ -112,9 +112,9 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 
     ```json
     {
-        username: "rick",
-        password: "password",
-        email: "rick@example.com"
+        "username": "rick",
+        "password": "password",
+        "email": "rick@example.com"
     }
     ```
 * Example response:
@@ -181,17 +181,17 @@ Requires user to be logged in and to match the specified user
 
     ```json
     {
-        username: "ricky",
-        password: "password123",
-        email: "rick92@example.com"
+        "username": "ricky",
+        "password": "password123",
+        "email": "rick92@example.com"
     }
     ```
 * Example response:
     ```json
     {
-        username: "ricky",
-        password: "password123",
-        email: "rick92@example.com"
+        "username": "ricky",
+        "password": "password123",
+        "email": "rick92@example.com"
     }
     ```
 ##### <a href="#top"> Return to top</a>
