@@ -391,6 +391,7 @@ Requires user to be logged in
 * Optional fields:
     * ```published: {{boolean}}```
 * Example request:
+ 
     ```POST``` ```https://blogger.adaptable.app/posts```
     ```
     {
