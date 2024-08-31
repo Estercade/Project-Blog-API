@@ -19,6 +19,7 @@ app.get("/users/:userid/drafts", auth.authenticate, (req, res, next) => next());
 app.post("/posts", auth.authenticate, (req, res, next) => next());
 app.put("/posts", auth.authenticate, (req, res, next) => next());
 app.delete("/posts", auth.authenticate, (req, res, next) => next());
+app.post("comments", auth.authenticate, (req, res, next) => next());
 app.put("comments", auth.authenticate, (req, res, next) => next());
 app.delete("comments", auth.authenticate, (req, res, next) => next());
 
