@@ -26,13 +26,13 @@ To access protected routes:
 | ```/posts/:postid``` | ```DELETE**``` | <a href="#delete-post">Delete post by post ID</a> |
 | ```/posts/:postid/comments``` | ```GET``` | <a href="#retrieve-post-comments">Retrieve comments by post ID</a> |
 | ```/posts/:postid/comments``` | ```POST*``` | <a href="#create-comment">Create a comment on post specified by post ID</a> |
-| ```/posts/:postid/rating``` | ```POST*``` | <a href=#rate-post>Rate a post
-| ```/posts/:postid/rating``` | ```PUT*``` | <a href=#update-post-rating>Update rating of a post
+| ```/posts/:postid/rating``` | ```POST*``` | <a href=#rate-post>Rate a post</a> |
+| ```/posts/:postid/rating``` | ```PUT*``` | <a href=#update-post-rating>Update post rating</a> |
 | ```/comments/:commentid``` | ```GET``` | <a href="#retrieve-comment">Retrieve comment by comment ID</a> |
 | ```/comments/:commentid``` | ```PUT**``` | <a href="#update-comment">Update comment by comment ID</a> |
 | ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete comment by comment ID</a> |
-| ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment
-| ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update rating of a comment
+| ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
+| ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update comment rating</a>
  
  \* - indicates routes that require authorization
  
@@ -152,6 +152,7 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
         "posts": [
             {
                 "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
+                "averageRating": null,
                 "title": "Maecenas sapien augue",
                 "content": "Suspendisse eleifend, libero ac condimentum scelerisque, mauris felis vulputate mi, et semper lorem nulla eleifend sapien. Integer blandit convallis tincidunt.",
                 "publishedAt": "2024-08-28T22:59:08.926Z",
@@ -159,7 +160,6 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
                 "author": {
                     "username": "rick"
                 },
-                "averageRating": null,
                 "_count": {
                     "comments": 2
                 }
@@ -222,9 +222,9 @@ Requires user to be logged in and to match the specified user
 ------------------------------------------------------------------------------------------
 ### Retrieve a user's posts only<a name="retrieve-user-posts"></a>
 * Sorting options (sorts posts by date published if sorting option is unspecified or invalid):
-    * ```date``` - sort by date published
-    * ```title``` - sort alphabetically by title
     * ```rating``` - sort by rating
+    * ```title``` - sort alphabetically by title
+    * ```date``` - sort by date published
     * ```comments``` - sort by number of comments
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
@@ -237,6 +237,7 @@ Requires user to be logged in and to match the specified user
     [
         {
             "id": "f1cf9b5d-3ccc-4f7c-a2d6-5348808e83b0",
+            "averageRating": null,
             "title": "Ut cursus elit sit amet sem scelerisque interdum",
             "content": "Vestibulum ultricies dui a velit finibus molestie. Vivamus et ornare nibh, ut consequat quam. Vivamus non aliquet justo, et volutpat dui. Donec luctus vitae elit sed molestie.",
             "published": true,
@@ -245,14 +246,13 @@ Requires user to be logged in and to match the specified user
             "author": {
                 "username": "rick"
             },
-            "averageRating": null,
-            "ratingCount": 0,
             "_count": {
                 "comments": 0
             }
         },
         {
             "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
+            "averageRating": null,
             "title": "Nunc tortor dui, semper vitae",
             "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
             "published": true,
@@ -261,8 +261,6 @@ Requires user to be logged in and to match the specified user
             "author": {
                 "username": "rick"
             },
-            "averageRating": null,
-            "ratingCount": 0,
             "_count": {
                 "comments": 1
             }
@@ -329,6 +327,7 @@ Requires user to be logged in and to match the specified user (drafts are hidden
     [
         {
             "id": "d3e32420-7667-4e63-957d-7988e2ea9298",
+            "averageRating": null,
             "title": "Cras ac massa orci",
             "content": "Suspendisse sit amet ultricies ex, non imperdiet urna. Ut feugiat ultricies purus a varius. Curabitur tempor est sed enim euismod, id euismod tortor dictum.",
             "published": false,
@@ -337,8 +336,6 @@ Requires user to be logged in and to match the specified user (drafts are hidden
             "author": {
                 "username": "rick"
             },
-            "averageRating": null,
-            "ratingCount": 0,
             "_count": {
                 "comments": 0
             }
@@ -349,11 +346,11 @@ Requires user to be logged in and to match the specified user (drafts are hidden
 ------------------------------------------------------------------------------------------
 ### Retrieve all posts<a name="retrieve-all-posts"></a>
 * Available sorting options (sorts draftsposts by date posted if sorting option is unspecified or invalid):
+    * ```rating``` - sort by average rating
     * ```title``` - sort by alphabetically title
     * ```date``` - sort by date published
-    * ```rating``` - sort by average rating
-    * ```comments``` - sort by number of comments
     * ```username``` - sort alphabetically by author's username
+    * ```comments``` - sort by number of comments
 * Available ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending
@@ -365,6 +362,7 @@ Requires user to be logged in and to match the specified user (drafts are hidden
     [
         {
             "id": "937aec0d-ba95-4550-8ea7-8f6d96529379",
+            "averageRating": null,
             "title": "Cras ut ligula dui",
             "content": "Nam sapien metus, mollis ac viverra ut, rhoncus ac metus. Duis dapibus, ligula eu pellentesque volutpat, eros tellus dignissim orci, fringilla lacinia dolor metus ut odio.",
             "published": true,
@@ -373,13 +371,13 @@ Requires user to be logged in and to match the specified user (drafts are hidden
             "author": {
                 "username": "rick"
             },
-            "averageRating": null,
             "_count": {
                 "comments": 0
             }
         },
         {
             "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
+            "averageRating": null,
             "title": "Etiam porttitor, dui in egestas fermentum",
             "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
             "published": true,
@@ -388,7 +386,6 @@ Requires user to be logged in and to match the specified user (drafts are hidden
             "author": {
                 "username": "rick"
             },
-            "averageRating": null,
             "_count": {
                 "comments": 1
             }
@@ -419,6 +416,7 @@ Requires user to be logged in
     ```json
     {
         "id": "ec1cd846-5f5b-4d6e-b382-cf9319216d1a",
+        "averageRating": null,
         "title": "Etiam porttitor, dui in egestas fermentum",
         "content": "Suspendisse auctor nulla eleifend semper aliquam.",
         "published": true,
@@ -427,8 +425,6 @@ Requires user to be logged in
         "author": {
             "username": "rick"
         },
-        "averageRating": null,
-        "ratingCount": 0,
         "comments": []
     }
     ```
@@ -442,6 +438,7 @@ Requires user to be logged in
     ```json
     {
         "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
+        "averageRating": null,
         "title": "Etiam porttitor, dui in egestas fermentum",
         "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
         "published": true,
@@ -450,8 +447,6 @@ Requires user to be logged in
         "author": {
             "username": "rick"
         },
-        "averageRating": null,
-        "ratingCount": 0,
         "comments": [
             {
                 "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
@@ -488,6 +483,7 @@ Requires user to be logged in and to match the post's author
     {
         "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
         "title": "Nunc tortor dui, semper vitae",
+        "averageRating": null,
         "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
         "published": true,
         "publishedAt": "2024-08-30T14:36:46.192Z",
@@ -495,7 +491,6 @@ Requires user to be logged in and to match the post's author
         "author": {
             "username": "rick"
         },
-        "averageRating": null,
         "_count": {
             "comments": 1
         }

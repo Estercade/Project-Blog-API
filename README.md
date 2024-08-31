@@ -34,18 +34,20 @@ Refer to [documentation](DOCS.md) for further details.
 | ```/posts/:postid``` | ```PUT**``` | Update post by post ID |
 | ```/posts/:postid``` | ```DELETE**``` | Delete post by post ID |
 | ```/posts/:postid/comments``` | ```GET``` | Retrieve comments by post ID |
+| ```/posts/:postid/rating``` | ```POST*``` | Rate a post |
+| ```/posts/:postid/rating``` | ```PUT*``` | Update post rating |
 | ```/posts/:postid/comments``` | ```POST*``` | Create a comment on post specified by post ID |
 | ```/comments/:commentid``` | ```GET``` | Retrieve comment by comment ID |
 | ```/comments/:commentid``` | ```PUT**``` | Update comment by comment ID |
 | ```/comments/:commentid``` | ```DELETE**``` | Delete comment by comment ID |
- 
+| ```/comments/:commentid/rating``` | ```POST*``` | Rate a comment
+| ```/comments/:commentid/rating``` | ```PUT*``` | Update comment rating
+| ```/comments/:commentid/rating``` | ```POST*``` | Rate a comment
+| ```/comments/:commentid/rating``` | ```PUT*``` | Update comment rating
+
  \* - indicates routes that require authorization
  
  \*\* - indicates routes that require both authorization and matching user ID
-
-```
-
-```
 
 ## Built using
 
