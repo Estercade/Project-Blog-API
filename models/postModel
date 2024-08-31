@@ -117,8 +117,6 @@ async function createPost(query) {
       },
     },
   })
-  const rating = post.rating.reduce((sum, { rating }) => sum + rating, 0,);
-  post.rating = rating;
   return post;
 }
 
@@ -238,7 +236,7 @@ async function ratePost(query) {
     }
   })
   // if user has never rated this post, create a new rating
-  if (!match) {
+  if (match.length < 1) {
     const rating = prisma.rating.create({
       data: {
         userId: query.userId,

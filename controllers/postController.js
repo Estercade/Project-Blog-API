@@ -160,7 +160,6 @@ async function createCommentByPostId(req, res) {
     authorId: currentUserId,
     postId: req.params.postId
   }
-  console.log(query);
   const comment = await postModel.createCommentByPostId(query);
   // database query will return null if specified post does not exist
   if (comment === null) {
