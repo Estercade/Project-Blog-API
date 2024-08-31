@@ -100,7 +100,7 @@ async function getPostsByUsername(req, res) {
         sort["title"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
       case "rating":
-        sort["rating"] = (req.query.order === "desc" ? "desc" : "asc");
+        sort["totalRating"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
       case "comments":
         sort["comments"] = { "_count": (req.query.order === "desc" ? "desc" : "asc") };
@@ -118,13 +118,18 @@ async function getPostsByUsername(req, res) {
 async function getCommentsByUsername(req, res) {
   if (req.query.sort) {
     var sort = {};
-    if (req.query.sort === "date") {
-      sort["posted"] = (req.query.order === "desc" ? "desc" : "asc");
+    switch (req.query.sort) {
+      case "date":
+        sort["postedAt"] = (req.query.order === "desc" ? "desc" : "asc");
+        break;
+      case "rating":
+        sort["toralRating"] = (req.query.order === "desc" ? "desc" : "asc");
+        break;
     }
   }
   const query = {
     username: req.params.username,
-    sort: (sort || { "posted": "desc" })
+    sort: (sort || { "postedAt": "desc" })
   }
   const comments = await userModel.getCommentsByUsername(query);
   res.json(comments);

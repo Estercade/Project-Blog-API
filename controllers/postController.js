@@ -12,7 +12,7 @@ async function getAllPosts(req, res) {
         sort["title"] = (req.query.order || "asc");
         break;
       case "rating":
-        sort["rating"] = (req.query.order || "asc");
+        sort["totalRating"] = (req.query.order || "asc");
         break;
       case "comments":
         sort["comments"] = { "_count": (req.query.order || "asc") };
