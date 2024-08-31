@@ -13,26 +13,26 @@ To access protected routes:
 | ```/login``` | ```POST``` |  <a href="#login">Log in to an existing account</a> |
 | ```/users``` | ```GET``` | <a href="#retrieve-all-users">Retrieve all user accounts</a> |
 | ```/users``` | ```POST``` | <a href="#create-user">Create a new user account</a> |
-| ```/users/:username``` | ```GET``` | <a href="#retrieve-user">Retrieve user account information by username</a>
-| ```/users/:username``` | ```PUT**``` | <a href="#update-user">Update user account information by username</a> |
-| ```/users/:username``` | ```DELETE**``` | <a href="#delete-user">Delete user account by username</a> |
-| ```/users/:username/posts``` | ```GET``` | <a href="#retrieve-user-posts">Retrieve posts by username</a> |
-| ```/users/:username/comments``` | ```GET``` | <a href="#retrieve-user-comments">Retrieve comments by username</a> |
-| ```/users/:username/drafts``` | ```GET**``` | <a href="#retrieve-user-drafts">Retrieve drafts by username</a> |
+| ```/users/:username``` | ```GET``` | <a href="#retrieve-user">Retrieve a user's account information</a>
+| ```/users/:username``` | ```PUT**``` | <a href="#update-user">Update user account information</a> |
+| ```/users/:username``` | ```DELETE**``` | <a href="#delete-user">Delete a user account</a> |
+| ```/users/:username/posts``` | ```GET``` | <a href="#retrieve-user-posts">Retrieve a user's posts</a> |
+| ```/users/:username/comments``` | ```GET``` | <a href="#retrieve-user-comments">Retrieve a user's comments</a> |
+| ```/users/:username/drafts``` | ```GET**``` | <a href="#retrieve-user-drafts">Retrieve a user's drafts</a> |
 | ```/posts``` | ```GET``` | <a href="#retrieve-all-posts">Retrieve all published posts</a> |
 | ```/posts``` | ```POST*``` | <a href="#create-post">Create a new post</a> |
-| ```/posts/:postid``` | ```GET``` | <a href="#retrieve-post">Retrieve post by post ID</a> |
-| ```/posts/:postid``` | ```PUT**``` | <a href="#update-post">Update post by post ID</a> |
-| ```/posts/:postid``` | ```DELETE**``` | <a href="#delete-post">Delete post by post ID</a> |
-| ```/posts/:postid/comments``` | ```GET``` | <a href="#retrieve-post-comments">Retrieve comments by post ID</a> |
-| ```/posts/:postid/comments``` | ```POST*``` | <a href="#create-comment">Create a comment on post specified by post ID</a> |
+| ```/posts/:postid``` | ```GET``` | <a href="#retrieve-post">Retrieve a post</a> |
+| ```/posts/:postid``` | ```PUT**``` | <a href="#update-post">Update a post</a> |
+| ```/posts/:postid``` | ```DELETE**``` | <a href="#delete-post">Delete a post</a> |
+| ```/posts/:postid/comments``` | ```GET``` | <a href="#retrieve-post-comments">Retrieve a post's comments</a> |
+| ```/posts/:postid/comments``` | ```POST*``` | <a href="#create-comment">Create a comment on a post</a> |
 | ```/posts/:postid/rating``` | ```POST*``` | <a href=#rate-post>Rate a post</a> |
-| ```/posts/:postid/rating``` | ```PUT*``` | <a href=#update-post-rating>Update post rating</a> |
-| ```/comments/:commentid``` | ```GET``` | <a href="#retrieve-comment">Retrieve comment by comment ID</a> |
-| ```/comments/:commentid``` | ```PUT**``` | <a href="#update-comment">Update comment by comment ID</a> |
-| ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete comment by comment ID</a> |
+| ```/posts/:postid/rating``` | ```PUT*``` | <a href=#update-post-rating>Update a post rating</a> |
+| ```/comments/:commentid``` | ```GET``` | <a href="#retrieve-comment">Retrieve a comment</a> |
+| ```/comments/:commentid``` | ```PUT**``` | <a href="#update-comment">Update a comment</a> |
+| ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete a comment</a> |
 | ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
-| ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update comment rating</a>
+| ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
  
  \* - indicates routes that require authorization
  
@@ -538,6 +538,29 @@ Requires user to be logged in and to match the post's author
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
+### Create a new comment<a name="create-comment"></a>
+Requires user to be logged in
+* Required fields: 
+    * ```content: {{string}}```
+* Example request:
+    
+    ```POST``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    
+* Example response:
+    ```json
+    {
+        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
+        "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+        "author": {
+            "username": "rick"
+        },
+        "posted": "2024-08-30T16:56:43.804Z",
+        "lastEdited": null,
+        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+    }
+    ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
 ### Rate a post<a name="rate-post"></a>
 Requires user to be logged in, , will update previous rating if found
 * Required fields: 
@@ -590,29 +613,6 @@ Requires user to be logged in, will create a new rating if no previous rating is
         "publishedAt": "2024-08-30T21:58:29.986Z",
         "lastEditedAt": null,
         "authorId": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510"
-    }
-    ```
-##### <a href="#top"> Return to top</a>
-------------------------------------------------------------------------------------------
-### Create a new comment<a name="create-comment"></a>
-Requires user to be logged in
-* Required fields: 
-    * ```content: {{string}}```
-* Example request:
-    
-    ```POST``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
-    
-* Example response:
-    ```json
-    {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
-        "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
-        "author": {
-            "username": "rick"
-        },
-        "posted": "2024-08-30T16:56:43.804Z",
-        "lastEdited": null,
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
     }
     ```
 ##### <a href="#top"> Return to top</a>
