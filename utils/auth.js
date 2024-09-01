@@ -10,9 +10,8 @@ const bcrypt = require("bcryptjs");
 passport.use(new JwtStrategy({
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.SECRET_KEY,
-  passReqToCallback: true,
 },
-  async (req, jwt_payload, done) => {
+  async (jwt_payload, done) => {
     try {
       const user = await prisma.user.findUnique({
         where: {
@@ -61,7 +60,12 @@ async function login(req, res, next) {
 
 // authentication middleware for routes
 function authenticate(req, res, next) {
-  passport.authenticate("jwt", { session: false });
+  if (!req.headers.authorization) {
+    return res.status(403).json("This action requires you to be logged in.");
+  };
+  passport.authenticate("jwt", {
+    session: false,
+  });
   next();
 }
 

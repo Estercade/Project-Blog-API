@@ -48,7 +48,7 @@ async function getPostByPostId(req, res) {
 
 async function createPost(req, res) {
   // if data is missing from request body, return HTTP error
-  if (!req.body.title | req.body.content) {
+  if (!req.body.title | !req.body.content) {
     return res.status(400).json("Required information in request body is missing.");
   }
   // retrieve current userId
