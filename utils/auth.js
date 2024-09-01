@@ -59,15 +59,9 @@ async function login(req, res, next) {
 }
 
 // authentication middleware for routes
-function authenticate(req, res, next) {
-  if (!req.headers.authorization) {
-    return res.status(403).json("This action requires you to be logged in.");
-  };
-  passport.authenticate("jwt", {
-    session: false,
-  });
-  next();
-}
+const authenticate = passport.authenticate("jwt", {
+  session: false,
+});
 
 module.exports = {
   login,
