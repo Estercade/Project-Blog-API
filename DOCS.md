@@ -34,13 +34,13 @@ To access protected routes:
 | ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete a comment</a> |
 | ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
 | ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
-| ```/admin/users/``` | ```GET***``` | <a href="admin-retrieve-all-users">Retrieve all user accounts (ADMIN)</a> |
+| ```/admin/users/``` | ```GET***``` | <a href="#admin-retrieve-all-users">Retrieve all user accounts (ADMIN)</a> |
 | ```/admin/users/:username``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```PUT***``` | <a href="#admin-update-user">Update user account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```DELETE***``` | <a href="#admin-delete-user">Delete a user account (ADMIN)</a> |
-| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's posts (ADMIN)</a> |
-| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's comments (ADMIN)</a> |
-| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's drafts (ADMIN)</a> |
+| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#admin-retrieve-user-posts">Retrieve a user's posts (ADMIN)</a> |
+| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#admin-retrieve-user-comments">Retrieve a user's comments (ADMIN)</a> |
+| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#admin-retrieve-user-drafts">Retrieve a user's drafts (ADMIN)</a> |
 | ```/admin/posts``` | ```GET***``` | <a href="#admin-retrieve-all-posts">Retrieve all posts (ADMIN)</a> |
 | ```/admin/posts/:postid``` | ```GET***``` | <a href="#admin-retrieve-post">Retrieve a post (ADMIN)</a> |
 | ```/admin/posts/:postid``` | ```DELETE***``` | <a href="#admin-delete-post">Delete a post (ADMIN)</a> |
@@ -330,6 +330,7 @@ Requires user to be logged in and to match the specified user
 ### Retrieve a user's comments<a name="retrieve-user-comments"></a>
 * Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
     * ```date``` - sort by date posted
+    * ```rating``` - sort by date rating
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
@@ -1038,6 +1039,7 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
     * ```date``` - sort by date posted
+    * ```rating``` - sort by date rating
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
