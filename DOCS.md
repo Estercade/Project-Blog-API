@@ -38,9 +38,9 @@ To access protected routes:
 | ```/admin/users/:username``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```PUT***``` | <a href="#admin-update-user">Update user account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```DELETE***``` | <a href="#admin-delete-user">Delete a user account (ADMIN)</a> |
-| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's posts (ADMIN)</a> |
-| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's comments (ADMIN)</a> |
-| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's drafts (ADMIN)</a> |
+| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#admin-retrieve-user-posts">Retrieve a user's posts (ADMIN)</a> |
+| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#admin-retrieve-user-comments">Retrieve a user's comments (ADMIN)</a> |
+| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#admin-retrieve-user-drafts">Retrieve a user's drafts (ADMIN)</a> |
 | ```/admin/posts``` | ```GET***``` | <a href="#admin-retrieve-all-posts">Retrieve all posts (ADMIN)</a> |
 | ```/admin/posts/:postid``` | ```GET***``` | <a href="#admin-retrieve-post">Retrieve a post (ADMIN)</a> |
 | ```/admin/posts/:postid``` | ```DELETE***``` | <a href="#admin-delete-post">Delete a post (ADMIN)</a> |
