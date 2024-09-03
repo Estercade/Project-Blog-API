@@ -330,6 +330,7 @@ Requires user to be logged in and to match the specified user
 ### Retrieve a user's comments<a name="retrieve-user-comments"></a>
 * Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
     * ```date``` - sort by date posted
+    * ```rating``` - sort by date rating
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
@@ -1038,6 +1039,7 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
     * ```date``` - sort by date posted
+    * ```rating``` - sort by date rating
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
