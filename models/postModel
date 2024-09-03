@@ -297,8 +297,11 @@ async function getCommentsByPostId(query) {
     where: {
       postId: query.postId
     },
+    take: query.take,
+    skip: query.skip,
     select: {
       id: true,
+      totalRating: true,
       content: true,
       author: {
         select: {
@@ -307,7 +310,8 @@ async function getCommentsByPostId(query) {
       },
       postedAt: true,
       lastEditedAt: true
-    }
+    },
+    orderBy: query.sort
   })
   return comments;
 }

@@ -4,6 +4,7 @@ Make HTTP requests to API endpoints via the URL: ```https://blogger.adaptable.ap
 
 To access protected routes:
 1. Send a ```POST``` request to ```/users``` with required username, password, and email keys in request body, which will return the created user
+    1a. Admin account can optionally be created by adding role to the request body with the value ```"ADMIN"``` in order to access admin-protected routes
 2. Send a ```POST``` request to ```/login``` using the user information for the created account, which will return a JWT as well as the name of the logged in user
 3. Place the JWT into your headers with the following format ``` authorization : bearer {{JWT string}} ```
 
@@ -33,19 +34,19 @@ To access protected routes:
 | ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete a comment</a> |
 | ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
 | ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
-| ```/admin/users/``` | ```GET***``` | <a href="admin-retrieve-all-users">Retrieve all user accounts</a> |
-| ```/admin/users/:username``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's account information</a> |
-| ```/admin/users/:username``` | ```PUT***``` | <a href="#update-user">Update user account information</a> |
-| ```/admin/users/:username``` | ```DELETE***``` | <a href="#delete-user">Delete a user account</a> |
-| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's posts</a> |
-| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's comments</a> |
-| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's drafts</a> |
-| ```/admin/posts``` | ```GET***``` | <a href="#retrieve-all-posts">Retrieve all posts</a> |
-| ```/admin/posts/:postid``` | ```GET***``` | <a href="#retrieve-post">Retrieve a post</a> |
-| ```/admin/posts/:postid``` | ```DELETE***``` | <a href="#delete-post">Delete a post</a> |
-| ```/admin/posts/:postid/comments``` | ```GET***``` | <a href="#retrieve-post-comments">Retrieve a post's comments</a> |
-| ```/admin/comments/:commentid``` | ```GET***``` | <a href="#retrieve-comment">Retrieve a comment</a> |
-| ```/admin/comments/:commentid``` | ```DELETE***``` | <a href="#delete-comment">Delete a comment</a> |
+| ```/admin/users/``` | ```GET***``` | <a href="admin-retrieve-all-users">Retrieve all user accounts (ADMIN)</a> |
+| ```/admin/users/:username``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's account information (ADMIN)</a> |
+| ```/admin/users/:username``` | ```PUT***``` | <a href="#admin-update-user">Update user account information (ADMIN)</a> |
+| ```/admin/users/:username``` | ```DELETE***``` | <a href="#admin-delete-user">Delete a user account (ADMIN)</a> |
+| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's posts (ADMIN)</a> |
+| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's comments (ADMIN)</a> |
+| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's drafts (ADMIN)</a> |
+| ```/admin/posts``` | ```GET***``` | <a href="#admin-retrieve-all-posts">Retrieve all posts (ADMIN)</a> |
+| ```/admin/posts/:postid``` | ```GET***``` | <a href="#admin-retrieve-post">Retrieve a post (ADMIN)</a> |
+| ```/admin/posts/:postid``` | ```DELETE***``` | <a href="#admin-delete-post">Delete a post (ADMIN)</a> |
+| ```/admin/posts/:postid/comments``` | ```GET***``` | <a href="#admin-retrieve-post-comments">Retrieve a post's comments (ADMIN)</a> |
+| ```/admin/comments/:commentid``` | ```GET***``` | <a href="#admin-retrieve-comment">Retrieve a comment (ADMIN)</a> |
+| ```/admin/comments/:commentid``` | ```DELETE***``` | <a href="#admin-delete-comment">Delete a comment (ADMIN)</a> |
 
  
  \* - indicates routes that require authorization
@@ -92,7 +93,7 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 ------------------------------------------------------------------------------------------
 ### Retrieve all users<a name="retrieve-all-users"></a>
 * Sorting options (sorts users by username if sorting option is unspecified or invalid):
-    * ```username``` - sort alphabetically by author's username
+    * ```username``` - sort alphabetically by username
     * ```posts``` - sort by number of posts
     * ```comments``` - sort by number of comments
 * Ordering options (ordering will only be performed if a sorting option is specified):
@@ -140,6 +141,8 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     * ```username: {{string}}```
     * ```password (must be at least 5 characters long): {{string}}```
     * ```email: {{string}}```
+* Optional fields: 
+    * ```role: {{ADMIN/USER}}```
 * Example request:
     
     ```POST``` ```https://blogger.adaptable.app/users```
@@ -272,7 +275,7 @@ Requires user to be logged in and to match the specified user
     ```204 No Content```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a user's posts only<a name="retrieve-user-posts"></a>
+### Retrieve a user's posts<a name="retrieve-user-posts"></a>
 * Sorting options (sorts posts by date published if sorting option is unspecified or invalid):
     * ```rating``` - sort by rating
     * ```title``` - sort alphabetically by title
@@ -324,7 +327,7 @@ Requires user to be logged in and to match the specified user
      ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a user's comments only<a name="retrieve-user-comments"></a>
+### Retrieve a user's comments<a name="retrieve-user-comments"></a>
 * Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
     * ```date``` - sort by date posted
 * Ordering options (ordering will only be performed if a sorting option is specified):
@@ -369,7 +372,7 @@ Requires user to be logged in and to match the specified user
      ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a user's drafts only<a name="retrieve-user-drafts"></a>
+### Retrieve a user's drafts<a name="retrieve-user-drafts"></a>
 Requires user to be logged in and to match the specified user (drafts are hidden to the public)
 * Sorting options (sorts drafts by date edited if sorting option is unspecified or invalid):
     * ```date``` - sort by date last edited
@@ -410,7 +413,6 @@ Requires user to be logged in and to match the specified user (drafts are hidden
     * ```rating``` - sort by average rating
     * ```title``` - sort by alphabetically title
     * ```date``` - sort by date published
-    * ```username``` - sort alphabetically by author's username
     * ```comments``` - sort by number of comments
 * Available ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
@@ -573,30 +575,41 @@ Requires user to be logged in and to match the post's author
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
 ### Retrieve a post's comments<a name="retrieve-post-comments"></a>
+* Sorting options (sorts posts by date published if sorting option is unspecified or invalid):
+    * ```rating``` - sort by rating
+    * ```date``` - sort by date published
+* Ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
     
-    ```GET```  ```https://blogger.adaptable.app/posts/674997d3-b1f1-4eb7-bbf5-19f96d461e2a/comments```
+    ```GET```  ```https://blogger.adaptable.app/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/comments?sort=rating&order=desc&limit=5&page=1```
 * Example response:
  
     ```
     [
         {
-            "id": "ca1477b6-84da-49f1-8535-b1897ce5f4a7",
-            "content": "Vellentesque elementum maximus augue ullamcorper semper.",
+            "id": "73d992df-7757-49cc-88b8-fd471bf31b44",
+            "totalRating": 0,
+            "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
-            "posted": "2024-08-28T23:11:14.502Z",
-            "lastEdited": null
+            "postedAt": "2024-09-03T16:08:51.217Z",
+            "lastEditedAt": null
         },
         {
-            "id": "097dab0f-e454-4d0d-b700-620bb3ada4d5",
-            "content": "Morbi molestie dui porttitor tortor tempor, ac pulvinar sapien aliquet.",
+            "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+            "totalRating": -1,
+            "content": "Class aptent taciti sociosqu ad litora torquent.",
             "author": {
                 "username": "rick"
             },
-            "posted": "2024-08-30T16:56:00.810Z",
-            "lastEdited": null
+            "postedAt": "2024-08-30T23:26:51.912Z",
+            "lastEditedAt": null
         }
     ]
     ```
@@ -794,10 +807,10 @@ Requires user to be logged in, will create a new rating if no previous rating is
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve all users<a name="admin-retrieve-all-users"></a>
+### Retrieve all users (ADMIN)<a name="admin-retrieve-all-users"></a>
 Requires user to be logged in and have ADMIN role
 * Sorting options (sorts users by username if sorting option is unspecified or invalid):
-    * ```username``` - sort alphabetically by author's username
+    * ```username``` - sort alphabetically by username
     * ```posts``` - sort by number of posts
     * ```comments``` - sort by number of comments
 * Ordering options (ordering will only be performed if a sorting option is specified):
@@ -845,7 +858,7 @@ Requires user to be logged in and have ADMIN role
 ##### <a href="#top"> Return to top</a>
 -----------------------------------------------------------------------------------------
 -
-### Retrieve a specific user's information<a name="retrieve-user"></a>
+### Retrieve a specific user's information (ADMIN)<a name="admin-retrieve-user"></a>
 Requires user to be logged in and have ADMIN role
 * Example request:
     
@@ -926,7 +939,7 @@ Requires user to be logged in and have ADMIN role
      ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Update a user's information<a name="admin-update-user"></a>
+### Update a user's information (ADMIN)<a name="admin-update-user"></a>
 Requires user to be logged in and have ADMIN role
 * Optional fields:
     * ```username (must be unique): {{string}}```
@@ -956,7 +969,7 @@ Requires user to be logged in and have ADMIN role
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Delete a user account<a name="admin-delete-user"></a>
+### Delete a user account (ADMIN)<a name="admin-delete-user"></a>
 Requires user to be logged in and have ADMIN role
 * Example request:
 
@@ -966,7 +979,7 @@ Requires user to be logged in and have ADMIN role
     ```204 No Content```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a user's posts only<a name="admin-retrieve-user-posts"></a>
+### Retrieve a user's posts (ADMIN)<a name="admin-retrieve-user-posts"></a>
 Requires user to be logged in and have ADMIN role
 * Sorting options (sorts posts by date published if sorting option is unspecified or invalid):
     * ```rating``` - sort by rating
@@ -1021,7 +1034,7 @@ Requires user to be logged in and have ADMIN role
      ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a user's comments only<a name="admin-retrieve-user-comments"></a>
+### Retrieve a user's comments (ADMIN)<a name="admin-retrieve-user-comments"></a>
 Requires user to be logged in and have ADMIN role
 * Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
     * ```date``` - sort by date posted
@@ -1071,7 +1084,7 @@ Requires user to be logged in and have ADMIN role
      ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a user's drafts only<a name="admin-retrieve-user-drafts"></a>
+### Retrieve a user's drafts (ADMIN)<a name="admin-retrieve-user-drafts"></a>
 Requires user to be logged in and have ADMIN role
 * Sorting options (sorts drafts by date edited if sorting option is unspecified or invalid):
     * ```date``` - sort by date last edited
@@ -1108,13 +1121,12 @@ Requires user to be logged in and have ADMIN role
      ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve all posts<a name="admin-retrieve-all-posts"></a>
+### Retrieve all posts (ADMIN)<a name="admin-retrieve-all-posts"></a>
 Requires user to be logged in and have ADMIN role, includes drafts
 * Available sorting options (sorts draftsposts by date posted if sorting option is unspecified or invalid):
     * ```rating``` - sort by average rating
     * ```title``` - sort by alphabetically title
     * ```date``` - sort by date published
-    * ```username``` - sort alphabetically by author's username
     * ```comments``` - sort by number of comments
     * ```published``` - sort by published/draft status
 * Available ordering options (ordering will only be performed if a sorting option is specified):
@@ -1181,7 +1193,7 @@ Requires user to be logged in and have ADMIN role, includes drafts
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a specific post<a name="admin-retrieve-post"></a>
+### Retrieve a specific post (ADMIN)<a name="admin-retrieve-post"></a>
 Requires user to be logged in and have ADMIN role
 * Example request:
     
@@ -1216,7 +1228,7 @@ Requires user to be logged in and have ADMIN role
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Delete a post<a name="delete-post"></a>
+### Delete a post (ADMIN)<a name="admin-delete-post"></a>
 Requires user to be logged in and have ADMIN role
 * Example request:
     
@@ -1226,25 +1238,79 @@ Requires user to be logged in and have ADMIN role
     ```204 No Content```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
-### Retrieve a post's comments<a name="admin-retrieve-post-comments"></a>
+### Retrieve a post's comments (ADMIN)<a name="admin-retrieve-post-comments"></a>
+Requires user to be logged in and have ADMIN role
+* Sorting options (sorts posts by date published if sorting option is unspecified or invalid):
+    * ```rating``` - sort by rating
+    * ```date``` - sort by date published
+* Ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
     
-    ```GET```  ```https://blogger.adaptable.app/admin/posts/9c2e944f-f08b-456d-9b38-588806280390/comments```
+    ```GET```  ```https://blogger.adaptable.app/admin/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/comments?sort=rating&order=desc&limit=5&page=1```
 * Example response:
  
     ```
     [
         {
-            "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
-            "totalRating": 2,
-            "content": "Proin cursus mi ut erat auctor.",
+            "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+            "totalRating": -1,
+            "content": "Class aptent taciti sociosqu ad litora torquent.",
             "author": {
                 "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
                 "username": "rick"
             },
-            "postedAt": "2024-08-31T01:17:30.189Z",
-            "lastEditedAt": "2024-08-31T01:17:51.692Z"
+            "postedAt": "2024-08-30T23:26:51.912Z",
+            "lastEditedAt": null
+        },
+        {
+            "id": "73d992df-7757-49cc-88b8-fd471bf31b44",
+            "totalRating": 0,
+            "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
+            "author": {
+                "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
+                "username": "kyle"
+            },
+            "postedAt": "2024-09-03T16:08:51.217Z",
+            "lastEditedAt": null
         }
     ]
     ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve a comment (ADMIN)<a name="admin-retrieve-comment"></a>
+Requires user to be logged in and have ADMIN role
+* Example request:
+    
+    ```GET``` ```https://blogger.adaptable.app/admin/comments/5bcb615e-182e-4f09-acea-de4bee21c03f```
+    
+* Example response:
+    ```json
+    {
+        "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
+        "totalRating": 2,
+        "content": "Proin cursus mi ut erat auctor.",
+        "author": {
+            "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+            "username": "rick"
+        },
+        "postedAt": "2024-08-31T01:17:30.189Z",
+        "lastEditedAt": "2024-08-31T01:17:51.692Z",
+        "postId": "9c2e944f-f08b-456d-9b38-588806280390"
+    }
+    ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Delete a comment (ADMIN)<a name="admin-delete-comment"></a>
+Requires user to be logged in and have ADMIN role
+* Example request:
+
+    ```DELETE``` ```https://blogger.adaptable.app/admin/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
+* Example response:
+ 
+    ```204 No Content```
 ##### <a href="#top"> Return to top</a>

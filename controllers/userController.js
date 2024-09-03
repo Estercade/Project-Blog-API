@@ -5,14 +5,19 @@ const bcrypt = require("bcryptjs");
 async function createUser(req, res, next) {
   if (!req.body.username | !req.body.email | !req.body.password) {
     return res.status(400).json("Please complete required fields.");
-  } else if (req.body.password.length < 5) {
+  }
+  if (req.body.password.length < 5) {
     return res.status(403).json("Password must be at least 5 characters long.")
+  }
+  if (req.body.role && req.body.role !== "USER" | req.body.role && req.body.role !== "ADMIN") {
+    return res.status(400).json("Invalid role type entered. Please enter USER or ADMIN.");
   }
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const query = {
     username: req.body.username,
     email: req.body.email,
-    password: hashedPassword
+    password: hashedPassword,
+    role: req.body.role
   }
   const user = await userModel.createUser(query);
   if (user === "taken") {
@@ -31,6 +36,7 @@ async function getAllUsers(req, res) {
     switch (req.query.sort) {
       case "username":
         sort["username"] = (req.query.order === "desc" ? "desc" : "asc");
+        break;
       case "posts":
         sort["posts"] = { "_count": (req.query.order === "desc" ? "desc" : "asc") };
         break;
@@ -91,11 +97,14 @@ async function updateUser(req, res, next) {
 async function deleteUser(req, res) {
   // retrieve current user's userId
   const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
-  // if target user's userId and current userId do not match, return HTTP error
-  if (req.params.userId !== currentUserId) {
+  const query = {
+    userId: currentUserId,
+    username: req.params.username
+  }
+  const user = await userModel.deleteUser(query);
+  if (user === "forbidden") {
     return res.status(403).json("Forbidden");
   }
-  await userModel.deleteUser(req.params.userId);
   res.status(204).json();
 }
 
@@ -166,6 +175,8 @@ async function getCommentsByUsername(req, res) {
 }
 
 async function getDraftsByUsername(req, res) {
+  // retrieve current user's userId
+  const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   if (req.query.limit < 1 | req.query.page < 1) {
     return res.status(400).json("Invalid pagination parameters entered.");
   }
@@ -181,8 +192,6 @@ async function getDraftsByUsername(req, res) {
         break;
     }
   }
-  // retrieve current user's userId
-  const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   const query = {
     userId: currentUserId,
     username: req.params.username,
