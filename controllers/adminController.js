@@ -1,68 +1,23 @@
-const userModel = require("../models/userModel");
-const jwt = require("jsonwebtoken");
+const adminModel = require("../models/adminModel");
 const bcrypt = require("bcryptjs");
-
-async function createUser(req, res, next) {
-  if (!req.body.username | !req.body.email | !req.body.password) {
-    return res.status(400).json("Please complete required fields.");
-  } else if (req.body.password.length < 5) {
-    return res.status(403).json("Password must be at least 5 characters long.")
-  }
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
-  const query = {
-    username: req.body.username,
-    email: req.body.email,
-    password: hashedPassword
-  }
-  const user = await userModel.createUser(query);
-  if (user === "taken") {
-    return res.status(409).json("That username already exists. Please choose another.");
-  }
-  res.json(user);
-}
 
 async function getAllUsers(req, res) {
   if (req.query.limit < 1 | req.query.page < 1) {
     return res.status(400).json("Invalid pagination parameters entered.");
   }
   const skip = req.query.page && req.query.limit ? ((Number(req.query.page) - 1) * Number(req.query.limit)) : ((Number(req.query.page) - 1) * 5);
-  if (req.query.sort) {
-    var sort = {};
-    switch (req.query.sort) {
-      case "username":
-        sort["username"] = (req.query.order === "desc" ? "desc" : "asc");
-      case "posts":
-        sort["posts"] = { "_count": (req.query.order === "desc" ? "desc" : "asc") };
-        break;
-      case "comments":
-        sort["comments"] = { "_count": (req.query.order === "desc" ? "desc" : "asc") };
-        break;
-    }
-  }
   const query = {
     take: (Number(req.query.limit) || 10),
     skip: (skip || undefined),
-    sort: (sort || { "username": "asc" }),
   }
-  const users = await userModel.getAllUsers(query);
+  const users = await adminModel.getAllUsers(query);
   res.json(users);
 }
 
-async function getUserByUsername(req, res) {
-  const query = {
-    username: req.params.username,
+async function updateUser(req, res) {
+  if (req.body.role && req.body.role !== "USER" | req.body.role && req.body.role !== "ADMIN") {
+    return res.status(400).json("Invalid role type entered. Please enter USER or ADMIN.");
   }
-  const user = await userModel.getUserByUsername(query);
-  // database query will return null if specified user does not exist
-  if (!user) {
-    return res.status(404).json("Specified user does not exist.");
-  }
-  res.json(user);
-}
-
-async function updateUser(req, res, next) {
-  // retrieve current user's userId
-  const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   // if password was entered as input field, check length then create hashedPassword
   if (req.body.password) {
     if (req.body.password.length < 5) {
@@ -71,31 +26,45 @@ async function updateUser(req, res, next) {
     var hashedPassword = await bcrypt.hash(req.body.password, 10);
   }
   const query = {
-    userId: currentUserId,
-    username: req.body.username,
+    userId: req.body.userId,
+    username: req.params.username,
+    newUsername: req.body.username,
+    password: hashedPassword,
     email: req.body.email,
-    password: hashedPassword
+    role: req.body.role
   }
-  const user = await userModel.updateUser(query);
+  const user = await adminModel.updateUser(query);
   // database query will return null if specified user does not exist
   if (!user) {
     return res.status(404).json("Specified user does not exist.");
   }
-  // database query will return "taken" string if username is already taken by another user
   if (user === "taken") {
     return res.status(409).json("That username already exists. Please choose another.");
   }
   res.json(user);
 }
 
-async function deleteUser(req, res) {
-  // retrieve current user's userId
-  const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
-  // if target user's userId and current userId do not match, return HTTP error
-  if (req.params.userId !== currentUserId) {
-    return res.status(403).json("Forbidden");
+async function getUserByUsername(req, res) {
+  const query = {
+    username: req.params.username,
   }
-  await userModel.deleteUser(req.params.userId);
+  const user = await adminModel.getUserByUsername(query);
+  // database query will return null if specified user does not exist
+  if (!user) {
+    return res.status(404).json("Specified user does not exist.");
+  }
+  res.json(user);
+}
+
+async function deleteUser(req, res) {
+  const query = {
+    userId: req.params.userId
+  }
+  // database query will return null if specified user does not exist
+  const user = await adminModel.deleteUser(query);
+  if (user === null) {
+    return res.status(404).json("Resource not found.");
+  }
   res.status(204).json();
 }
 
@@ -127,9 +96,9 @@ async function getPostsByUsername(req, res) {
     skip: (skip || undefined),
     sort: ((sort || { "publishedAt": "desc" }))
   }
-  const posts = await userModel.getPostsByUsername(query);
+  const posts = await adminModel.getPostsByUsername(query);
   // database query will return null if specified user does not exist
-  if (!comments) {
+  if (!posts) {
     return res.status(404).json("Specified user does not exist.");
   }
   res.json(posts);
@@ -157,7 +126,7 @@ async function getCommentsByUsername(req, res) {
     skip: (skip || undefined),
     sort: (sort || { "postedAt": "desc" })
   }
-  const comments = await userModel.getCommentsByUsername(query);
+  const comments = await adminModel.getCommentsByUsername(query);
   // database query will return null if specified user does not exist
   if (!comments) {
     return res.status(404).json("Specified user does not exist.");
@@ -181,19 +150,13 @@ async function getDraftsByUsername(req, res) {
         break;
     }
   }
-  // retrieve current user's userId
-  const currentUserId = jwt.decode((req.headers.authorization.split(" ")[1]), { complete: true }).payload.userId;
   const query = {
-    userId: currentUserId,
     username: req.params.username,
     take: (Number(req.query.limit) || 10),
     skip: (skip || undefined),
     sort: ((sort || { "lastEditedAt": "desc" }))
   }
-  const drafts = await userModel.getDraftsByUsername(query);
-  if (drafts === "forbidden") {
-    return res.status(403).json("Forbidden");
-  }
+  const drafts = await adminModel.getDraftsByUsername(query);
   // database query will return null if specified user does not exist
   if (!drafts) {
     return res.status(404).json("Specified user does not exist.");
@@ -201,13 +164,109 @@ async function getDraftsByUsername(req, res) {
   res.json(drafts);
 }
 
+async function getAllPosts(req, res) {
+  if (req.query.sort) {
+    var sort = {};
+    switch (req.query.sort) {
+      case "date":
+        sort["publishedAt"] = (req.query.order || "asc");
+        break;
+      case "title":
+        sort["title"] = (req.query.order || "asc");
+        break;
+      case "rating":
+        sort["totalRating"] = (req.query.order || "asc");
+        break;
+      case "comments":
+        sort["comments"] = { "_count": (req.query.order || "asc") };
+        break;
+      case "username":
+        sort["author.username"] = (req.query.order || "asc");
+      case "published":
+        sort["published"] = (req.query.order || "asc");
+    }
+  }
+  if (req.query.limit < 1 | req.query.page < 1) {
+    return res.status(400).json("Invalid pagination parameters entered.");
+  }
+  const skip = req.query.page && req.query.limit ? ((Number(req.query.page) - 1) * Number(req.query.limit)) : ((Number(req.query.page) - 1) * 5);
+  const query = {
+    take: (Number(req.query.limit) || 10),
+    skip: (skip || undefined),
+    sort: (sort || { "publishedAt": "desc" }),
+  }
+  const posts = await adminModel.getAllPosts(query);
+  res.json(posts);
+}
+
+async function getPostByPostId(req, res) {
+  const query = {
+    postId: req.params.postId,
+  }
+  const post = await adminModel.getPostByPostId(query);
+  res.json(post);
+}
+
+async function deletePost(req, res) {
+  const query = {
+    postId: req.params.postId,
+  }
+  const post = await adminModel.deletePost(query);
+  // database query will return null if specified post does not exist
+  if (!post) {
+    return res.status(404).json("Resource not found.");
+  }
+  res.status(204).json();
+}
+
+async function getCommentsByPostId(req, res) {
+  const query = {
+    postId: req.params.postId,
+  }
+  const comments = await adminModel.getCommentsByPostId(query);
+  // database query will return null if specified post does not exist
+  if (!comments) {
+    return res.status(404).json("Resource not found.");
+  }
+  res.json(comments);
+}
+
+async function getCommentByCommentId(req, res) {
+  const query = {
+    commentId: req.params.commentId,
+  }
+  const comment = await adminModel.getCommentByCommentId(query);
+  // database query will return null if specified comment does not exist
+  if (!comment) {
+    return res.status(404).json("Resource not found.");
+  }
+  res.json(comment);
+}
+
+async function deleteComment(req, res) {
+  const query = {
+    commentId: req.params.commentId,
+  }
+  const comment = await adminModel.deleteComment(query);
+  // database query will return null if specified comment does not exist
+  if (!comment) {
+    return res.status(404).json("Resource not found.");
+  }
+  res.status(204).json();
+}
+
 module.exports = {
-  createUser,
   getAllUsers,
   getUserByUsername,
   updateUser,
   deleteUser,
   getPostsByUsername,
   getCommentsByUsername,
-  getDraftsByUsername
+  getDraftsByUsername,
+  getAllPosts,
+  getPostByPostId,
+  deletePost,
+  getCommentsByPostId,
+  getCommentByCommentId,
+  deleteComment,
 }

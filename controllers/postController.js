@@ -102,7 +102,7 @@ async function deletePost(req, res) {
   }
   const post = await postModel.deletePost(query);
   // database query will return null if specified post does not exist
-  if (post === null) {
+  if (!post) {
     return res.status(404).json("Resource not found.");
   }
   // database query will return forbidden if author id does not match current user's id
@@ -129,7 +129,7 @@ async function ratePost(req, res) {
   }
   const rating = await postModel.ratePost(query);
   // database query will return null if specified post does not exist
-  if (rating === null) {
+  if (!rating) {
     return res.status(404).json("Resource not found.");
   }
   // update the post's rating if rating has been performed
@@ -143,7 +143,7 @@ async function getCommentsByPostId(req, res) {
   }
   const comments = await postModel.getCommentsByPostId(query);
   // database query will return null if specified post does not exist
-  if (comments === null) {
+  if (!comments) {
     return res.status(404).json("Resource not found.");
   }
   res.json(comments);
@@ -162,7 +162,7 @@ async function createCommentByPostId(req, res) {
   }
   const comment = await postModel.createCommentByPostId(query);
   // database query will return null if specified post does not exist
-  if (comment === null) {
+  if (!comment) {
     return res.status(404).json("Resource not found.");
   }
   res.json(comment);

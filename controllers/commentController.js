@@ -1,18 +1,6 @@
 const commentModel = require("../models/commentModel");
 const jwt = require("jsonwebtoken");
 
-async function getCommentsByPostId(req, res) {
-  const query = {
-    postId: req.params.postId
-  }
-  const comments = await commentModel.getCommentsByPostId(query);
-  // database query will return null if specified comment does not exist
-  if (comments === null) {
-    return res.status(404).json("Resource not found.");
-  }
-  res.json(comments);
-}
-
 async function getCommentByCommentId(req, res) {
   const query = {
     commentId: req.params.commentId
@@ -23,14 +11,6 @@ async function getCommentByCommentId(req, res) {
     return res.status(404).json("Resource not found.");
   }
   res.json(comment);
-}
-
-async function getCommentsByUser(req, res) {
-  const query = {
-    userId: req.params.userId
-  }
-  const comments = await commentModel.getCommentsByPost(query);
-  res.json(comments);
 }
 
 async function updateComment(req, res) {
@@ -95,8 +75,6 @@ async function rateComment(req, res) {
 
 module.exports = {
   getCommentByCommentId,
-  getCommentsByPostId,
-  getCommentsByUser,
   updateComment,
   deleteComment,
   rateComment

@@ -26,6 +26,7 @@ app.delete("comments", auth.authenticate, (req, res, next) => next());
 app.use("/users", routes.user);
 app.use("/posts", routes.post);
 app.use("/comments", routes.comment);
+app.use("/admin", routes.admin);
 
 app.use((err, req, res, next) => {
   res.status(404).json("Not found");

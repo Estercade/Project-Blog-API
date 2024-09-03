@@ -13,7 +13,7 @@ To access protected routes:
 | ```/login``` | ```POST``` |  <a href="#login">Log in to an existing account</a> |
 | ```/users``` | ```GET``` | <a href="#retrieve-all-users">Retrieve all user accounts</a> |
 | ```/users``` | ```POST``` | <a href="#create-user">Create a new user account</a> |
-| ```/users/:username``` | ```GET``` | <a href="#retrieve-user">Retrieve a user's account information</a>
+| ```/users/:username``` | ```GET``` | <a href="#retrieve-user">Retrieve a user's account information</a> |
 | ```/users/:username``` | ```PUT**``` | <a href="#update-user">Update user account information</a> |
 | ```/users/:username``` | ```DELETE**``` | <a href="#delete-user">Delete a user account</a> |
 | ```/users/:username/posts``` | ```GET``` | <a href="#retrieve-user-posts">Retrieve a user's posts</a> |
@@ -33,10 +33,26 @@ To access protected routes:
 | ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete a comment</a> |
 | ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
 | ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
+| ```/admin/users/``` | ```GET***``` | <a href="admin-retrieve-all-users">Retrieve all user accounts</a> |
+| ```/admin/users/:username``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's account information</a> |
+| ```/admin/users/:username``` | ```PUT***``` | <a href="#update-user">Update user account information</a> |
+| ```/admin/users/:username``` | ```DELETE***``` | <a href="#delete-user">Delete a user account</a> |
+| ```/admin/users/:username/posts``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's posts</a> |
+| ```/admin/users/:username/comments``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's comments</a> |
+| ```/admin/users/:username/drafts``` | ```GET***``` | <a href="#retrieve-user">Retrieve a user's drafts</a> |
+| ```/admin/posts``` | ```GET***``` | <a href="#retrieve-all-posts">Retrieve all posts</a> |
+| ```/admin/posts/:postid``` | ```GET***``` | <a href="#retrieve-post">Retrieve a post</a> |
+| ```/admin/posts/:postid``` | ```DELETE***``` | <a href="#delete-post">Delete a post</a> |
+| ```/admin/posts/:postid/comments``` | ```GET***``` | <a href="#retrieve-post-comments">Retrieve a post's comments</a> |
+| ```/admin/comments/:commentid``` | ```GET***``` | <a href="#retrieve-comment">Retrieve a comment</a> |
+| ```/admin/comments/:commentid``` | ```DELETE***``` | <a href="#delete-comment">Delete a comment</a> |
+
  
  \* - indicates routes that require authorization
  
  \*\* - indicates routes that require both authorization and matching user ID
+
+ \*\*\* - indicates routes that require both authorization and ADMIN role
 
 ------------------------------------------------------------------------------------------
 ### HTTP Status Codes
@@ -44,10 +60,11 @@ To access protected routes:
 | --- | --- |
 | 200 | OK - successful HTTP request |
 | 204 | No content - specified resource successfully deleted |
-| 400 | Bad request - required field missing from request body |
+| 400 | Bad request - invalid value or missing required field from request body |
 | 401 | Unauthorized - incorrect login information submitted |
 | 403 | Forbidden - unauthorized access attempted |
 | 404 | Not found - specified resource unable to be located |
+| 409 | Conflict - specified field that must be unique contains a non-unique value |
 ------------------------------------------------------------------------------------------
 ### Log in<a name="login"></a>
 Returns a JWT which expires after 3 hours and the username of the logged in user. JWT must be attached to authorization header to access protected routes. See <a href="#usage">Usage</a> for further instructions.
@@ -81,9 +98,12 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users?sort=comments&order=desc```
+    ```GET``` ```https://blogger.adaptable.app/users?sort=comments&order=desc&limit=5&page=1```
 * Example response:
     ```json
     [
@@ -118,7 +138,7 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 ### Create a new user account<a name="create-user"></a>
 * Required fields: 
     * ```username: {{string}}```
-    * ```password: {{string}}```
+    * ```password (must be at least 5 characters long): {{string}}```
     * ```email: {{string}}```
 * Example request:
     
@@ -149,34 +169,65 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     ```json
     {
         "username": "rick",
+        "_count": {
+            "posts": 2,
+            "comments": 2
+        },
         "posts": [
             {
-                "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
-                "averageRating": null,
-                "title": "Maecenas sapien augue",
-                "content": "Suspendisse eleifend, libero ac condimentum scelerisque, mauris felis vulputate mi, et semper lorem nulla eleifend sapien. Integer blandit convallis tincidunt.",
-                "publishedAt": "2024-08-28T22:59:08.926Z",
-                "lastEdited": null,
+                "id": "9c2e944f-f08b-456d-9b38-588806280390",
+                "totalRating": 1,
+                "title": "Mauris venenatis in massa sit amet vestibulum",
+                "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+                "publishedAt": "2024-08-31T01:17:11.454Z",
+                "lastEditedAt": null,
                 "author": {
                     "username": "rick"
                 },
                 "_count": {
-                    "comments": 2
+                    "comments": 1
+                }
+            },
+            {
+                "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+                "totalRating": -1,
+                "title": "Lorem ipsum dolor sit amet",
+                "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
+                "publishedAt": "2024-08-30T21:58:29.986Z",
+                "lastEditedAt": null,
+                "author": {
+                    "username": "rick"
+                },
+                "_count": {
+                    "comments": 1
                 }
             }
         ],
         "comments": [
             {
-                "id": "feaede6f-41d9-4b7d-8ac4-13822ea967ce",
-                "content": "Maecenas ac tincidunt arcu. Aliquam non metus ipsum.",
-                "posted": "2024-08-28T21:46:03.512Z",
-                "lastEdited": "2024-08-28T22:01:01.814Z",
+                "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+                "content": "Class aptent taciti sociosqu ad litora torquent.",
+                "postedAt": "2024-08-30T23:26:51.912Z",
+                "lastEditedAt": null,
                 "author": {
                     "username": "rick"
                 },
                 "post": {
-                    "id": "d3b06afd-081d-4546-b7d2-3b3649f2884f",
-                    "title": "My first post"
+                    "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+                    "title": "Lorem ipsum dolor sit amet"
+                }
+            },
+            {
+                "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
+                "content": "Proin cursus mi ut erat auctor.",
+                "postedAt": "2024-08-31T01:17:30.189Z",
+                "lastEditedAt": "2024-08-31T01:17:51.692Z",
+                "author": {
+                    "username": "rick"
+                },
+                "post": {
+                    "id": "9c2e944f-f08b-456d-9b38-588806280390",
+                    "title": "Mauris venenatis in massa sit amet vestibulum"
                 }
             }
         ]
@@ -188,7 +239,7 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 Requires user to be logged in and to match the specified user
 * Required fields: 
     * ```username (must be unique): {{string}}```
-    * ```password: {{string}}```
+    * ```password (must be at least 5 characters long): {{string}}```
     * ```email: {{string}}```
 * Example request:
     ```PUT``` ```https://blogger.adaptable.app/users/:username```
@@ -205,7 +256,8 @@ Requires user to be logged in and to match the specified user
     {
         "username": "ricky",
         "password": "password123",
-        "email": "rick92@example.com"
+        "email": "rick92@example.com",
+        "role": "USER"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -229,9 +281,12 @@ Requires user to be logged in and to match the specified user
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/posts?sort=title&order=desc```
+    ```GET``` ```https://blogger.adaptable.app/users/rick/posts?sort=title&order=desc&limit=5&page=1```
 * Example response:
     ```json
     [
@@ -275,9 +330,12 @@ Requires user to be logged in and to match the specified user
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/comments?sort=date&order=asc```
+    ```GET``` ```https://blogger.adaptable.app/users/rick/comments?sort=date&order=asc&limit=5&page=1```
 * Example response:
     ```json
     [
@@ -319,9 +377,12 @@ Requires user to be logged in and to match the specified user (drafts are hidden
 * Ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/drafts```
+    ```GET``` ```https://blogger.adaptable.app/users/rick/drafts?sort=date&order=asc&limit=5&page=1```
 * Example response:
     ```json
     [
@@ -354,9 +415,12 @@ Requires user to be logged in and to match the specified user (drafts are hidden
 * Available ordering options (ordering will only be performed if a sorting option is specified):
     * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
     * ```desc``` - descending
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/posts?sort=title&order=asc```
+    ```GET``` ```https://blogger.adaptable.app/posts?sort=title&order=asc&limit=5&page=1```
 * Output example:
     ```json
     [
@@ -730,3 +794,457 @@ Requires user to be logged in, will create a new rating if no previous rating is
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
+### Retrieve all users<a name="admin-retrieve-all-users"></a>
+Requires user to be logged in and have ADMIN role
+* Sorting options (sorts users by username if sorting option is unspecified or invalid):
+    * ```username``` - sort alphabetically by author's username
+    * ```posts``` - sort by number of posts
+    * ```comments``` - sort by number of comments
+* Ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
+* Example request:
+
+    ```GET``` ```https://blogger.adaptable.app/admin/users?sort=comments&order=desc&limit=5&page=1```
+* Example response:
+    ```json
+    [
+        {
+            "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+            "username": "rick",
+            "password": "$2a$10$JtIeqcyW4mrzp4XboUtgjuHljmrkRN4bEDJkDQ6GucKfh0nzUlgAu",
+            "email": "rick@example.com",
+            "role": "USER"
+        },
+        {
+            "id": "8244da38-20b1-44db-acf6-670c84c88892",
+            "username": "jason",
+            "password": "$2a$10$3YXWpkJedltK0PPMI17/U.1DKpgnNrkZH3U/uUCs.WAMgJWjAq7Rm",
+            "email": "rick@example.com",
+            "role": "USER"
+        },
+        {
+            "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
+            "username": "kyle",
+            "password": "$2a$10$chMRtUcM5cquQRvWGsOayeoFMQY0S9.jgupc6KsZCHMUGtFhPIpe6",
+            "email": "kyle@example.com",
+            "role": "ADMIN"
+        },
+        {
+            "id": "f7a0a426-6ea8-4dbc-bfc2-f5c4e4c4466f",
+            "username": "admin",
+            "password": "$2a$10$3tdHKav6ZxjsKLApo7/puu6oYl6UXTNCW2K7njoLHfJAlIRjXixcC",
+            "email": "admin@example.com",
+            "role": "ADMIN"
+        }
+    ]
+     ```
+##### <a href="#top"> Return to top</a>
+-----------------------------------------------------------------------------------------
+-
+### Retrieve a specific user's information<a name="retrieve-user"></a>
+Requires user to be logged in and have ADMIN role
+* Example request:
+    
+    ```GET``` ```https://blogger.adaptable.app/admin/users/rick```
+* Example response:
+    ```json
+    {
+        "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+        "username": "rick",
+        "_count": {
+            "posts": 2,
+            "comments": 2
+        },
+        "email": "rick@example.com",
+        "posts": [
+            {
+                "id": "9c2e944f-f08b-456d-9b38-588806280390",
+                "totalRating": 1,
+                "title": "Mauris venenatis in massa sit amet vestibulum",
+                "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+                "publishedAt": "2024-08-31T01:17:11.454Z",
+                "lastEditedAt": null,
+                "author": {
+                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "username": "rick"
+                },
+                "_count": {
+                    "comments": 1
+                }
+            },
+            {
+                "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+                "totalRating": -1,
+                "title": "Lorem ipsum dolor sit amet",
+                "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
+                "publishedAt": "2024-08-30T21:58:29.986Z",
+                "lastEditedAt": null,
+                "author": {
+                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "username": "rick"
+                },
+                "_count": {
+                    "comments": 1
+                }
+            }
+        ],
+        "comments": [
+            {
+                "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+                "content": "Class aptent taciti sociosqu ad litora torquent.",
+                "postedAt": "2024-08-30T23:26:51.912Z",
+                "lastEditedAt": null,
+                "author": {
+                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "username": "rick"
+                },
+                "post": {
+                    "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+                    "title": "Lorem ipsum dolor sit amet"
+                }
+            },
+            {
+                "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
+                "content": "Proin cursus mi ut erat auctor.",
+                "postedAt": "2024-08-31T01:17:30.189Z",
+                "lastEditedAt": "2024-08-31T01:17:51.692Z",
+                "author": {
+                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "username": "rick"
+                },
+                "post": {
+                    "id": "9c2e944f-f08b-456d-9b38-588806280390",
+                    "title": "Mauris venenatis in massa sit amet vestibulum"
+                }
+            }
+        ]
+    }
+     ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Update a user's information<a name="admin-update-user"></a>
+Requires user to be logged in and have ADMIN role
+* Optional fields:
+    * ```username (must be unique): {{string}}```
+    * ```password (must be at least 5 characters long): {{string}}```
+    * ```email: {{string}}```
+    * ```role: {{ADMIN/USER}}```
+* Example request:
+    ```PUT``` ```https://blogger.adaptable.app/users/:username```
+
+    ```json
+    {
+        "username": "ricky",
+        "password": "password123",
+        "email": "rick92@example.com",
+        "role": "USER"
+    }
+    ```
+* Example response:
+    ```json
+    {
+        "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+        "username": "ricky",
+        "password": "password123",
+        "email": "rick92@example.com",
+        "role": "USER"
+    }
+    ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Delete a user account<a name="admin-delete-user"></a>
+Requires user to be logged in and have ADMIN role
+* Example request:
+
+    ```DELETE``` ```https://blogger.adaptable.app/admin/users/jared```
+* Example response:
+ 
+    ```204 No Content```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve a user's posts only<a name="admin-retrieve-user-posts"></a>
+Requires user to be logged in and have ADMIN role
+* Sorting options (sorts posts by date published if sorting option is unspecified or invalid):
+    * ```rating``` - sort by rating
+    * ```title``` - sort alphabetically by title
+    * ```date``` - sort by date published
+    * ```comments``` - sort by number of comments
+* Ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
+* Example request:
+
+    ```GET``` ```https://blogger.adaptable.app/admin/users/rick/posts?sort=title&order=desc&limit=5&page=1```
+* Example response:
+    ```json
+    [
+        {
+            "id": "9c2e944f-f08b-456d-9b38-588806280390",
+            "totalRating": 1,
+            "title": "Mauris venenatis in massa sit amet vestibulum",
+            "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+            "published": true,
+            "publishedAt": "2024-08-31T01:17:11.454Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "_count": {
+                "comments": 1
+            }
+        },
+        {
+            "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+            "totalRating": -1,
+            "title": "Lorem ipsum dolor sit amet",
+            "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
+            "published": true,
+            "publishedAt": "2024-08-30T21:58:29.986Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "_count": {
+                "comments": 1
+            }
+        }
+    ]
+     ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve a user's comments only<a name="admin-retrieve-user-comments"></a>
+Requires user to be logged in and have ADMIN role
+* Sorting options (sorts comments by date posted if sorting option is unspecified or invalid):
+    * ```date``` - sort by date posted
+* Ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
+* Example request:
+
+    ```GET``` ```https://blogger.adaptable.app/admin/users/rick/comments?sort=date&order=asc&limit=5&page=1```
+* Example response:
+    ```json
+    [
+        {
+            "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+            "totalRating": -1,
+            "content": "Class aptent taciti sociosqu ad litora torquent.",
+            "postedAt": "2024-08-30T23:26:51.912Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "post": {
+                "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+                "title": "Lorem ipsum dolor sit amet"
+            }
+        },
+        {
+            "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
+            "totalRating": 2,
+            "content": "Proin cursus mi ut erat auctor.",
+            "postedAt": "2024-08-31T01:17:30.189Z",
+            "lastEditedAt": "2024-08-31T01:17:51.692Z",
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "post": {
+                "id": "9c2e944f-f08b-456d-9b38-588806280390",
+                "title": "Mauris venenatis in massa sit amet vestibulum"
+            }
+        }
+    ]
+     ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve a user's drafts only<a name="admin-retrieve-user-drafts"></a>
+Requires user to be logged in and have ADMIN role
+* Sorting options (sorts drafts by date edited if sorting option is unspecified or invalid):
+    * ```date``` - sort by date last edited
+    * ```created``` - sort by date created
+* Ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending order
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
+* Example request:
+
+    ```GET``` ```https://blogger.adaptable.app/admin/users/kyle/drafts?sort=date&order=asc&limit=5&page=1```
+* Example response:
+    ```json
+    [
+        {
+            "id": "20c680aa-2649-4ede-91a3-82938acf32d8",
+            "totalRating": 0,
+            "title": "Quisque pulvinar consequat euismod",
+            "content": "Mauris eget diam est. Praesent neque libero, tincidunt vestibulum diam nec, pulvinar sollicitudin augue. Pellentesque molestie arcu vel vestibulum maximus.",
+            "published": false,
+            "publishedAt": null,
+            "lastEditedAt": null,
+            "author": {
+                "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
+                "username": "kyle"
+            },
+            "_count": {
+                "comments": 0
+            }
+        }
+    ]
+     ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve all posts<a name="admin-retrieve-all-posts"></a>
+Requires user to be logged in and have ADMIN role, includes drafts
+* Available sorting options (sorts draftsposts by date posted if sorting option is unspecified or invalid):
+    * ```rating``` - sort by average rating
+    * ```title``` - sort by alphabetically title
+    * ```date``` - sort by date published
+    * ```username``` - sort alphabetically by author's username
+    * ```comments``` - sort by number of comments
+    * ```published``` - sort by published/draft status
+* Available ordering options (ordering will only be performed if a sorting option is specified):
+    * ```asc``` - ascending order (default order if ordering option is unspecified or invalid)
+    * ```desc``` - descending
+* Pagination options: 
+    * ```limit``` - number of results to return (defaults to 10 if unspecified)
+    * ```page``` - specifies which page of results to view
+* Example request:
+
+    ```GET``` ```https://blogger.adaptable.app/admin/posts?sort=title&order=asc&limit=5&page=1```
+* Output example:
+    ```json
+    [
+        {
+            "id": "58871ded-2f3b-4760-b2d4-c6bba5f30af4",
+            "totalRating": 0,
+            "title": "Curabitur mollis velit elementum",
+            "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+            "published": true,
+            "publishedAt": "2024-08-31T01:16:11.191Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "_count": {
+                "comments": 0
+            }
+        },
+        {
+            "id": "6f64d8fb-20c7-43b9-ba3c-617d7b68ad69",
+            "totalRating": 0,
+            "title": "Curabitur mollis velit elementum",
+            "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+            "published": true,
+            "publishedAt": "2024-08-31T01:16:53.065Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "_count": {
+                "comments": 0
+            }
+        },
+        {
+            "id": "20c680aa-2649-4ede-91a3-82938acf32d8",
+            "totalRating": 0,
+            "title": "Quisque pulvinar consequat euismod",
+            "content": "Mauris eget diam est. Praesent neque libero, tincidunt vestibulum diam nec, pulvinar sollicitudin augue. Pellentesque molestie arcu vel vestibulum maximus.",
+            "published": false,
+            "publishedAt": null,
+            "lastEditedAt": null,
+            "author": {
+                "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
+                "username": "kyle"
+            },
+            "_count": {
+                "comments": 0
+            }
+        }
+    ]
+    ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve a specific post<a name="admin-retrieve-post"></a>
+Requires user to be logged in and have ADMIN role
+* Example request:
+    
+    ```GET``` ```https://blogger.adaptable.app/admin/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+* Example response:
+    ```json
+    {
+        "id": "9c2e944f-f08b-456d-9b38-588806280390",
+        "totalRating": 1,
+        "title": "Mauris venenatis in massa sit amet vestibulum",
+        "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+        "published": true,
+        "publishedAt": "2024-08-31T01:17:11.454Z",
+        "lastEditedAt": null,
+        "author": {
+            "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+            "username": "rick"
+        },
+        "comments": [
+            {
+                "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
+                "content": "Proin cursus mi ut erat auctor.",
+                "author": {
+                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "username": "rick"
+                },
+                "postedAt": "2024-08-31T01:17:30.189Z",
+                "lastEditedAt": "2024-08-31T01:17:51.692Z"
+            }
+        ]
+    }
+    ```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Delete a post<a name="delete-post"></a>
+Requires user to be logged in and have ADMIN role
+* Example request:
+    
+    ```DELETE```  ```https://blogger.adaptable.app/posts/f4a06acf-1ec8-4c7f-8b32-6287c74dd467```
+* Example response:
+ 
+    ```204 No Content```
+##### <a href="#top"> Return to top</a>
+------------------------------------------------------------------------------------------
+### Retrieve a post's comments<a name="admin-retrieve-post-comments"></a>
+* Example request:
+    
+    ```GET```  ```https://blogger.adaptable.app/admin/posts/9c2e944f-f08b-456d-9b38-588806280390/comments```
+* Example response:
+ 
+    ```
+    [
+        {
+            "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
+            "totalRating": 2,
+            "content": "Proin cursus mi ut erat auctor.",
+            "author": {
+                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "username": "rick"
+            },
+            "postedAt": "2024-08-31T01:17:30.189Z",
+            "lastEditedAt": "2024-08-31T01:17:51.692Z"
+        }
+    ]
+    ```
+##### <a href="#top"> Return to top</a>

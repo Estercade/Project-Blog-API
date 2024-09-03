@@ -293,24 +293,20 @@ async function updatePostRating(query) {
 }
 
 async function getCommentsByPostId(query) {
-  let { comments } = await prisma.post.findUnique({
+  const comments = await prisma.comment.findMany({
     where: {
-      id: query.postId
+      postId: query.postId
     },
     select: {
-      comments: {
+      id: true,
+      content: true,
+      author: {
         select: {
-          id: true,
-          content: true,
-          author: {
-            select: {
-              username: true,
-            }
-          },
-          postedAt: true,
-          lastEditedAt: true
+          username: true,
         }
-      }
+      },
+      postedAt: true,
+      lastEditedAt: true
     }
   })
   return comments;

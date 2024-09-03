@@ -1,39 +1,16 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-async function createUser(query) {
-  const match = await prisma.user.findUnique({
-    where: {
-      username: query.username,
-    }
-  });
-  // return "taken" if username is already taken
-  if (match) {
-    return "taken";
-  }
-  const user = await prisma.user.create({
-    data: {
-      username: query.username,
-      password: query.password,
-      email: query.email,
-    },
-    select: {
-      username: true,
-      email: true,
-      role: true
-    }
-  });
-  return user;
-}
-
 async function getAllUsers(query) {
   const users = await prisma.user.findMany({
     take: query.take,
     skip: query.skip,
     select: {
+      id: true,
       username: true,
+      email: true,
       _count: {
-        select: { 
+        select: {
           posts: true,
           comments: true,
         }
@@ -51,13 +28,15 @@ async function getUserByUsername(query) {
       username: query.username
     },
     select: {
+      id: true,
       username: true,
       _count: {
-        select: { 
+        select: {
           posts: true,
           comments: true,
         }
       },
+      email: true,
       posts: {
         where: {
           published: true
@@ -71,6 +50,7 @@ async function getUserByUsername(query) {
           lastEditedAt: true,
           author: {
             select: {
+              id: true,
               username: true
             }
           },
@@ -87,6 +67,7 @@ async function getUserByUsername(query) {
           lastEditedAt: true,
           author: {
             select: {
+              id: true,
               username: true
             }
           },
@@ -104,7 +85,6 @@ async function getUserByUsername(query) {
 }
 
 async function updateUser(query) {
-  // check if username is already taken
   const match = await prisma.user.findUnique({
     where: {
       username: query.username,
@@ -114,10 +94,6 @@ async function updateUser(query) {
   if (!match) {
     return null;
   }
-    // return "forbidden" if current userId does not match the userId associated with the target user
-    if (match && match.id !== query.userId) {
-      return "taken";
-    }
   // if username is being changed, check if the username is taken 
   if (query.newUsername && query.username !== query.newUsername) {
     const usernameCheck = await prisma.user.findUnique({
@@ -131,28 +107,40 @@ async function updateUser(query) {
   }
   const user = await prisma.user.update({
     where: {
-      username: query.username,
+      username: query.username
     },
     data: {
-      username: query.username,
+      username: query.newUsername,
       password: query.password,
-      email: query.email
+      email: query.email,
+      role: query.role
     },
     select: {
+      id: true,
       username: true,
       email: true,
       role: true
     }
-  });
+  })
   return user;
 }
 
-async function deleteUser(targetUserId) {
-  await prisma.user.delete({
+async function deleteUser(query) {
+  const user = await prisma.user.findUnique({
     where: {
-      id: targetUserId
+      id: query.userId
+    }
+  })
+  // if user by the given userId is not found, return "null"
+  if (!user) {
+    return null;
+  }
+  await prisma.comment.delete({
+    where: {
+      id: query.userId
     }
   });
+  return "deleted";
 }
 
 async function getPostsByUsername(query) {
@@ -167,15 +155,15 @@ async function getPostsByUsername(query) {
   }
   const [{ posts }] = await prisma.user.findMany({
     where: {
-      username: query.username
+      username: query.username,
     },
     select: {
       posts: {
+        take: query.take,
+        skip: query.skip,
         where: {
           published: true
         },
-        take: query.take,
-        skip: query.skip,
         select: {
           id: true,
           totalRating: true,
@@ -186,6 +174,7 @@ async function getPostsByUsername(query) {
           lastEditedAt: true,
           author: {
             select: {
+              id: true,
               username: true,
             }
           },
@@ -206,7 +195,6 @@ async function getCommentsByUsername(query) {
       username: query.username
     }
   })
-  // if user by the given username is not found, return "null"
   if (!user) {
     return null;
   }
@@ -227,6 +215,7 @@ async function getCommentsByUsername(query) {
           lastEditedAt: true,
           author: {
             select: {
+              id: true,
               username: true
             }
           },
@@ -245,7 +234,6 @@ async function getCommentsByUsername(query) {
 }
 
 async function getDraftsByUsername(query) {
-  // retrieve target user
   const user = await prisma.user.findUnique({
     where: {
       username: query.username
@@ -255,32 +243,28 @@ async function getDraftsByUsername(query) {
   if (!user) {
     return null;
   }
-  // if current userId does not match the userId associated 
-  // with that username, return "forbidden" string
-  if (user.id !== query.userId) {
-    return "forbidden";
-  }
   const [drafts] = await prisma.user.findMany({
     where: {
-      username: query.username
+      username: query.username,
     },
     select: {
       posts: {
-        where: {
-          published: false
-        },
         take: query.take,
         skip: query.skip,
+        where: {
+          published: false,
+        },
         select: {
           id: true,
           totalRating: true,
           title: true,
           content: true,
           published: true,
-          createdAt: true,
+          publishedAt: true,
           lastEditedAt: true,
           author: {
             select: {
+              id: true,
               username: true,
             }
           },
@@ -295,13 +279,167 @@ async function getDraftsByUsername(query) {
   return drafts.posts;
 }
 
+async function getAllPosts(query) {
+  const posts = await prisma.post.findMany({
+    take: query.take,
+    skip: query.skip,
+    select: {
+      id: true,
+      totalRating: true,
+      title: true,
+      content: true,
+      published: true,
+      publishedAt: true,
+      lastEditedAt: true,
+      author: {
+        select: {
+          id: true,
+          username: true,
+        }
+      },
+      _count: {
+        select: { comments: true },
+      },
+    },
+    orderBy: query.sort
+  });
+  return posts;
+}
+
+async function getPostByPostId(query) {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: query.postId
+    },
+    select: {
+      id: true,
+      totalRating: true,
+      title: true,
+      content: true,
+      published: true,
+      publishedAt: true,
+      lastEditedAt: true,
+      author: {
+        select: {
+          id: true,
+          username: true,
+        }
+      },
+      comments: {
+        select: {
+          id: true,
+          content: true,
+          author: {
+            select: {
+              id: true,
+              username: true
+            }
+          },
+          postedAt: true,
+          lastEditedAt: true,
+        }
+      },
+    },
+  })
+  return post;
+}
+
+async function deletePost(query) {
+  const post = await prisma.post.findUnique({
+    where: {
+      id: query.postId
+    }
+  })
+  // return null if specified post does not exist
+  if (!post) {
+    return null;
+  }
+  await prisma.post.delete({
+    where: {
+      id: query.postId
+    }
+  });
+  return "deleted";
+}
+
+async function getCommentsByPostId(query) {
+  const comments = await prisma.comment.findMany({
+    where: {
+      postId: query.postId
+    },
+    select: {
+      id: true,
+      totalRating: true,
+      content: true,
+      author: {
+        select: {
+          id: true,
+          username: true,
+        }
+      },
+      postedAt: true,
+      lastEditedAt: true
+    }
+  })
+  return comments;
+}
+
+async function getCommentByCommentId(query) {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: query.commentId
+    },
+    select: {
+      id: true,
+      totalRating: true,
+      content: true,
+      author: {
+        select: {
+          id: true,
+          username: true
+        }
+      },
+      postedAt: true,
+      lastEditedAt: true,
+      postId: true,
+    }
+  })
+  return comment;
+}
+
+async function deleteComment(query) {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: query.commentId
+    },
+    select: {
+      authorId: true
+    }
+  })
+  // if comment is not found, return "null"
+  if (!comment) {
+    return null;
+  }
+  await prisma.comment.delete({
+    where: {
+      id: query.commentId
+    }
+  });
+  return "deleted";
+}
+
 module.exports = {
-  createUser,
   getAllUsers,
   getUserByUsername,
   updateUser,
   deleteUser,
   getPostsByUsername,
   getCommentsByUsername,
-  getDraftsByUsername
+  getDraftsByUsername,
+  getAllPosts,
+  getPostByPostId,
+  deletePost,
+  getCommentsByPostId,
+  getCommentByCommentId,
+  deleteComment,
 }
