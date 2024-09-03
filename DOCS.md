@@ -34,7 +34,7 @@ To access protected routes:
 | ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete a comment</a> |
 | ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
 | ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
-| ```/admin/users/``` | ```GET***``` | <a href="admin-retrieve-all-users">Retrieve all user accounts (ADMIN)</a> |
+| ```/admin/users/``` | ```GET***``` | <a href="#admin-retrieve-all-users">Retrieve all user accounts (ADMIN)</a> |
 | ```/admin/users/:username``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```PUT***``` | <a href="#admin-update-user">Update user account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```DELETE***``` | <a href="#admin-delete-user">Delete a user account (ADMIN)</a> |
