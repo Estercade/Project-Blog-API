@@ -1,6 +1,6 @@
 ## Blog API Documentation <a name="top"></a>
 ### Usage<a name="usage"></a>
-Make HTTP requests to API endpoints via the URL: ```https://blogger.adaptable.app/``` 
+Make HTTP requests to API endpoints via the URL: ```https://project-blog-api.onrender.com/``` 
 
 To access protected routes:
 1. Send a ```POST``` request to ```/users``` with required username, password, and email keys in request body, which will return the created user

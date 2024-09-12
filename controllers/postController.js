@@ -155,7 +155,7 @@ async function getCommentsByPostId(req, res) {
     postId: req.params.postId,
     take: (Number(req.query.limit) || 10),
     skip: (skip || undefined),
-    sort: (sort || { "publishedAt": "desc" })
+    sort: (sort || { "postedAt": "desc" })
   }
   const comments = await postModel.getCommentsByPostId(query);
   // database query will return null if specified post does not exist

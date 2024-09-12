@@ -12,7 +12,7 @@ The goal of this project is to create a RESTful blog API using Node.js and Expre
 - User authentication and authorization with protected endpoints
 
 ### Usage
-A preview of this app can be access by making HTTP requests to API endpoints via the URL: ```https://blogger.adaptable.app/``` 
+A preview of this app can be access by making HTTP requests to API endpoints via the URL: ```https://project-blog-api.onrender.com/``` 
 
 Refer to [documentation](DOCS.md) for further details.
 
@@ -44,10 +44,26 @@ Refer to [documentation](DOCS.md) for further details.
 | ```/comments/:commentid/rating``` | ```PUT*``` | Update comment rating
 | ```/comments/:commentid/rating``` | ```POST*``` | Rate a comment
 | ```/comments/:commentid/rating``` | ```PUT*``` | Update comment rating
+| ```/admin/users/``` | ```GET***``` | Retrieve all user accounts (ADMIN) |
+| ```/admin/users/:username``` | ```GET***``` | Retrieve a user's account information (ADMIN) |
+| ```/admin/users/:username``` | ```PUT***``` | Update user account information (ADMIN) |
+| ```/admin/users/:username``` | ```DELETE***``` | Delete a user account (ADMIN) |
+| ```/admin/users/:username/posts``` | ```GET***``` | Retrieve a user's posts (ADMIN) |
+| ```/admin/users/:username/comments``` | ```GET***``` | Retrieve a user's comments (ADMIN) |
+| ```/admin/users/:username/drafts``` | ```GET***``` | Retrieve a user's drafts (ADMIN) |
+| ```/admin/posts``` | ```GET***``` | Retrieve all posts (ADMIN) |
+| ```/admin/posts/:postid``` | ```GET***``` | Retrieve a post (ADMIN) |
+| ```/admin/posts/:postid``` | ```DELETE***``` | Delete a post (ADMIN) |
+| ```/admin/posts/:postid/comments``` | ```GET***``` | Retrieve a post's comments (ADMIN) |
+| ```/admin/comments/:commentid``` | ```GET***``` | Retrieve a comment (ADMIN) |
+| ```/admin/comments/:commentid``` | ```DELETE***``` | Delete a comment (ADMIN) |
+
 
  \* - indicates routes that require authorization
  
  \*\* - indicates routes that require both authorization and matching user ID
+
+ \*\*\* - indicates routes that require both authorization and ADMIN role
 
 ## Built using
 
