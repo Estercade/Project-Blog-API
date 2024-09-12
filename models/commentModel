@@ -106,15 +106,6 @@ async function rateComment(query) {
         userId: query.userId,
         commentId: query.commentId,
         rating: query.rating,
-      },
-      select: {
-        rating: true,
-        user: {
-          select: {
-            username: true,
-          }
-        },
-        commentId: true,
       }
     })
     return rating;

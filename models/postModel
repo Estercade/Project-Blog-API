@@ -242,15 +242,6 @@ async function ratePost(query) {
         userId: query.userId,
         postId: query.postId,
         rating: query.rating,
-      },
-      select: {
-        rating: true,
-        user: {
-          select: {
-            username: true,
-          }
-        },
-        postId: true,
       }
     })
     return rating;
@@ -262,7 +253,7 @@ async function ratePost(query) {
       },
       data: {
         rating: query.rating,
-      }
+      },
     })
     return rating;
   }
@@ -287,7 +278,35 @@ async function updatePostRating(query) {
     },
     data: {
       totalRating: newTotalRating,
-    }
+    },
+    select: {
+      id: true,
+      totalRating: true,
+      title: true,
+      content: true,
+      published: true,
+      publishedAt: true,
+      lastEditedAt: true,
+      author: {
+        select: {
+          username: true,
+        }
+      },
+      comments: {
+        select: {
+          id: true,
+          totalRating: true,
+          content: true,
+          author: {
+            select: {
+              username: true
+            }
+          },
+          postedAt: true,
+          lastEditedAt: true,
+        }
+      },
+    },
   })
   return updatedPost;
 }
@@ -325,6 +344,7 @@ async function createCommentByPostId(query) {
     },
     select: {
       id: true,
+      totalRating: true,
       content: true,
       author: {
         select: {

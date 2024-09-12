@@ -116,7 +116,7 @@ async function getCommentsByUsername(req, res) {
         sort["postedAt"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
       case "rating":
-        sort["toralRating"] = (req.query.order === "desc" ? "desc" : "asc");
+        sort["totalRating"] = (req.query.order === "desc" ? "desc" : "asc");
         break;
     }
   }
@@ -220,8 +220,26 @@ async function deletePost(req, res) {
 }
 
 async function getCommentsByPostId(req, res) {
+  if (req.query.limit < 1 | req.query.page < 1) {
+    return res.status(400).json("Invalid pagination parameters entered.");
+  }
+  const skip = req.query.page && req.query.limit ? ((Number(req.query.page) - 1) * Number(req.query.limit)) : ((Number(req.query.page) - 1) * 5);
+  if (req.query.sort) {
+    var sort = {};
+    switch (req.query.sort) {
+      case "date":
+        sort["postedAt"] = (req.query.order || "asc");
+        break;
+      case "rating":
+        sort["totalRating"] = (req.query.order || "asc");
+        break;
+    }
+  }
   const query = {
     postId: req.params.postId,
+    take: (Number(req.query.limit) || 10),
+    skip: (skip || undefined),
+    sort: (sort || { "postedAt": "desc" })
   }
   const comments = await adminModel.getCommentsByPostId(query);
   // database query will return null if specified post does not exist

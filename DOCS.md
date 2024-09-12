@@ -27,13 +27,13 @@ To access protected routes:
 | ```/posts/:postid``` | ```DELETE**``` | <a href="#delete-post">Delete a post</a> |
 | ```/posts/:postid/comments``` | ```GET``` | <a href="#retrieve-post-comments">Retrieve a post's comments</a> |
 | ```/posts/:postid/comments``` | ```POST*``` | <a href="#create-comment">Create a comment on a post</a> |
-| ```/posts/:postid/rating``` | ```POST*``` | <a href=#rate-post>Rate a post</a> |
-| ```/posts/:postid/rating``` | ```PUT*``` | <a href=#update-post-rating>Update a post rating</a> |
+| ```/posts/:postid/ratings``` | ```POST*``` | <a href=#rate-post>Rate a post</a> |
+| ```/posts/:postid/ratings``` | ```PUT*``` | <a href=#update-post-rating>Update a post rating</a> |
 | ```/comments/:commentid``` | ```GET``` | <a href="#retrieve-comment">Retrieve a comment</a> |
 | ```/comments/:commentid``` | ```PUT**``` | <a href="#update-comment">Update a comment</a> |
 | ```/comments/:commentid``` | ```DELETE**``` | <a href="#delete-comment">Delete a comment</a> |
-| ```/comments/:commentid/rating``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
-| ```/comments/:commentid/rating``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
+| ```/comments/:commentid/ratings``` | ```POST*``` | <a href=#rate-comment>Rate a comment</a>
+| ```/comments/:commentid/ratings``` | ```PUT*``` | <a href=#update-comment-rating>Update a comment rating</a>
 | ```/admin/users/``` | ```GET***``` | <a href="#admin-retrieve-all-users">Retrieve all user accounts (ADMIN)</a> |
 | ```/admin/users/:username``` | ```GET***``` | <a href="#admin-retrieve-user">Retrieve a user's account information (ADMIN)</a> |
 | ```/admin/users/:username``` | ```PUT***``` | <a href="#admin-update-user">Update user account information (ADMIN)</a> |
@@ -74,7 +74,7 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     * ```password: {{string}}```
 * Example request:
 
-    ```POST``` ```https://blogger.adaptable.app/login```
+    ```POST``` ```https://project-blog-api.onrender.com/login```
     ```json
     {
         "username": "rick",
@@ -104,33 +104,33 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users?sort=comments&order=desc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/users?sort=comments&order=desc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "username": "rick",
-            "_count": {
-                "posts": 6,
-                "comments": 4
-            },
-            "role": "MEMBER"
-        },
-        {
-            "username": "kyle",
+            "username": "admin",
             "_count": {
                 "posts": 1,
                 "comments": 1
             },
-            "role": "MEMBER"
+            "role": "ADMIN"
         },
         {
-            "username": "bob",
+            "username": "rick",
             "_count": {
                 "posts": 1,
+                "comments": 1
+            },
+            "role": "USER"
+        },
+        {
+            "username": "kyle",
+            "_count": {
+                "posts": 2,
                 "comments": 0
             },
-            "role": "MEMBER"
+            "role": "USER"
         }
     ]
      ```
@@ -145,7 +145,7 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
     * ```role: {{ADMIN/USER}}```
 * Example request:
     
-    ```POST``` ```https://blogger.adaptable.app/users```
+    ```POST``` ```https://project-blog-api.onrender.com/users```
 
     ```json
     {
@@ -167,73 +167,46 @@ Returns a JWT which expires after 3 hours and the username of the logged in user
 ### Retrieve a specific user's information<a name="retrieve-user"></a>
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/users/rick```
+    ```GET``` ```https://project-blog-api.onrender.com/users/kyle```
 * Example response:
     ```json
     {
-        "username": "rick",
+        "username": "kyle",
         "_count": {
             "posts": 2,
-            "comments": 2
+            "comments": 0
         },
         "posts": [
             {
-                "id": "9c2e944f-f08b-456d-9b38-588806280390",
-                "totalRating": 1,
-                "title": "Mauris venenatis in massa sit amet vestibulum",
-                "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
-                "publishedAt": "2024-08-31T01:17:11.454Z",
-                "lastEditedAt": null,
+                "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+                "totalRating": 2,
+                "title": "Pellentesque dolor risus",
+                "content": "Etiam gravida vestibulum turpis, quis aliquam tellus dictum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+                "publishedAt": "2024-09-12T17:37:36.433Z",
+                "lastEditedAt": "2024-09-12T17:38:03.308Z",
                 "author": {
-                    "username": "rick"
+                    "username": "kyle"
                 },
                 "_count": {
                     "comments": 1
                 }
             },
             {
-                "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
+                "id": "b43e63ce-d2c6-4dc5-a431-3b78c83dd2d8",
                 "totalRating": -1,
-                "title": "Lorem ipsum dolor sit amet",
-                "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
-                "publishedAt": "2024-08-30T21:58:29.986Z",
+                "title": "Suspendisse vitae augue ac dui",
+                "content": "Pellentesque lobortis sagittis neque, et consequat nulla finibus at. Nam massa justo, hendrerit id lacus ac, dictum viverra erat. Proin et auctor tortor.",
+                "publishedAt": "2024-09-12T17:51:51.704Z",
                 "lastEditedAt": null,
                 "author": {
-                    "username": "rick"
+                    "username": "kyle"
                 },
                 "_count": {
-                    "comments": 1
+                    "comments": 0
                 }
             }
         ],
-        "comments": [
-            {
-                "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
-                "content": "Class aptent taciti sociosqu ad litora torquent.",
-                "postedAt": "2024-08-30T23:26:51.912Z",
-                "lastEditedAt": null,
-                "author": {
-                    "username": "rick"
-                },
-                "post": {
-                    "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-                    "title": "Lorem ipsum dolor sit amet"
-                }
-            },
-            {
-                "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
-                "content": "Proin cursus mi ut erat auctor.",
-                "postedAt": "2024-08-31T01:17:30.189Z",
-                "lastEditedAt": "2024-08-31T01:17:51.692Z",
-                "author": {
-                    "username": "rick"
-                },
-                "post": {
-                    "id": "9c2e944f-f08b-456d-9b38-588806280390",
-                    "title": "Mauris venenatis in massa sit amet vestibulum"
-                }
-            }
-        ]
+        "comments": []
     }
      ```
 ##### <a href="#top"> Return to top</a>
@@ -245,7 +218,7 @@ Requires user to be logged in and to match the specified user
     * ```password (must be at least 5 characters long): {{string}}```
     * ```email: {{string}}```
 * Example request:
-    ```PUT``` ```https://blogger.adaptable.app/users/:username```
+    ```PUT``` ```https://project-blog-api.onrender.com/users/:username```
 
     ```json
     {
@@ -269,7 +242,7 @@ Requires user to be logged in and to match the specified user
 Requires user to be logged in and to match the specified user
 * Example request:
 
-    ```DELETE``` ```https://blogger.adaptable.app/users/jared```
+    ```DELETE``` ```https://project-blog-api.onrender.com/users/jared```
 * Example response:
  
     ```204 No Content```
@@ -289,35 +262,35 @@ Requires user to be logged in and to match the specified user
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/posts?sort=title&order=desc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/users/kyle/posts?sort=title&order=desc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "f1cf9b5d-3ccc-4f7c-a2d6-5348808e83b0",
-            "averageRating": null,
-            "title": "Ut cursus elit sit amet sem scelerisque interdum",
-            "content": "Vestibulum ultricies dui a velit finibus molestie. Vivamus et ornare nibh, ut consequat quam. Vivamus non aliquet justo, et volutpat dui. Donec luctus vitae elit sed molestie.",
+            "id": "b43e63ce-d2c6-4dc5-a431-3b78c83dd2d8",
+            "totalRating": -1,
+            "title": "Suspendisse vitae augue ac dui",
+            "content": "Pellentesque lobortis sagittis neque, et consequat nulla finibus at. Nam massa justo, hendrerit id lacus ac, dictum viverra erat. Proin et auctor tortor.",
             "published": true,
-            "publishedAt": "2024-08-28T18:52:56.296Z",
-            "lastEdited": null,
+            "publishedAt": "2024-09-12T17:51:51.704Z",
+            "lastEditedAt": null,
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "_count": {
                 "comments": 0
             }
         },
         {
-            "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-            "averageRating": null,
-            "title": "Nunc tortor dui, semper vitae",
-            "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
+            "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+            "totalRating": 2,
+            "title": "Pellentesque dolor risus",
+            "content": "Etiam gravida vestibulum turpis, quis aliquam tellus dictum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
             "published": true,
-            "publishedAt": "2024-08-30T14:36:46.192Z",
-            "lastEdited": "2024-08-30T17:40:00.927Z",
+            "publishedAt": "2024-09-12T17:37:36.433Z",
+            "lastEditedAt": "2024-09-12T17:38:03.308Z",
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "_count": {
                 "comments": 1
@@ -339,34 +312,36 @@ Requires user to be logged in and to match the specified user
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/comments?sort=date&order=asc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/users/kyle/comments?sort=date&order=asc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "ca1477b6-84da-49f1-8535-b1897ce5f4a7",
-            "content": "Vellentesque elementum maximus augue ullamcorper semper.",
-            "posted": "2024-08-28T23:11:14.502Z",
-            "lastEdited": null,
+            "id": "87d11735-3ed9-46ce-a921-258824b56379",
+            "totalRating": 0,
+            "content": "Praesent orci libero, sodales sit amet convallis in, malesuada vel tortor.",
+            "postedAt": "2024-09-12T18:00:16.346Z",
+            "lastEditedAt": null,
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "post": {
-                "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
-                "title": "Maecenas sapien augue"
+                "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+                "title": "Pellentesque dolor risus"
             }
         },
         {
-            "id": "097dab0f-e454-4d0d-b700-620bb3ada4d5",
-            "content": "Morbi molestie dui porttitor tortor tempor, ac pulvinar sapien aliquet.",
-            "posted": "2024-08-30T16:56:00.810Z",
-            "lastEdited": null,
+            "id": "eafe76ba-7c6b-4cc1-9524-1ab6ee4ac005",
+            "totalRating": 0,
+            "content": "Phasellus quis tellus eu nisi tempor auctor. ",
+            "postedAt": "2024-09-12T18:00:39.809Z",
+            "lastEditedAt": null,
             "author": {
-                "username": "rick"
+                "username": "kyle"
             },
             "post": {
-                "id": "674997d3-b1f1-4eb7-bbf5-19f96d461e2a",
-                "title": "Maecenas sapien augue"
+                "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+                "title": "Pellentesque dolor risus"
             }
         }
     ]
@@ -386,18 +361,18 @@ Requires user to be logged in and to match the specified user (drafts are hidden
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/users/rick/drafts?sort=date&order=asc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/users/rick/drafts?sort=date&order=asc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "d3e32420-7667-4e63-957d-7988e2ea9298",
-            "averageRating": null,
-            "title": "Cras ac massa orci",
-            "content": "Suspendisse sit amet ultricies ex, non imperdiet urna. Ut feugiat ultricies purus a varius. Curabitur tempor est sed enim euismod, id euismod tortor dictum.",
+            "id": "e2950951-26c6-4730-80b8-f68cbc39654f",
+            "totalRating": 0,
+            "title": "Nam id mi eu libero suscipit feugiat in vel sem",
+            "content": "Curabitur at eros auctor massa imperdiet rhoncus ut sed diam. Donec ac efficitur eros.",
             "published": false,
-            "createdAt": "2024-08-28T19:05:56.120Z",
-            "lastEdited": "2024-08-28T19:06:21.881Z",
+            "createdAt": "2024-09-12T17:51:06.386Z",
+            "lastEditedAt": null,
             "author": {
                 "username": "rick"
             },
@@ -423,38 +398,53 @@ Requires user to be logged in and to match the specified user (drafts are hidden
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/posts?sort=title&order=asc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/posts?sort=title&order=asc&limit=5&page=1```
 * Output example:
     ```json
     [
         {
-            "id": "937aec0d-ba95-4550-8ea7-8f6d96529379",
-            "averageRating": null,
-            "title": "Cras ut ligula dui",
-            "content": "Nam sapien metus, mollis ac viverra ut, rhoncus ac metus. Duis dapibus, ligula eu pellentesque volutpat, eros tellus dignissim orci, fringilla lacinia dolor metus ut odio.",
+            "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+            "totalRating": 0,
+            "title": "Nunc tortor dui, semper vitae",
+            "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
             "published": true,
-            "publishedAt": "2024-08-29T02:30:34.303Z",
-            "lastEdited": null,
+            "publishedAt": "2024-09-12T13:32:56.875Z",
+            "lastEditedAt": null,
             "author": {
-                "username": "rick"
-            },
-            "_count": {
-                "comments": 0
-            }
-        },
-        {
-            "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-            "averageRating": null,
-            "title": "Etiam porttitor, dui in egestas fermentum",
-            "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
-            "published": true,
-            "publishedAt": "2024-08-30T14:36:46.192Z",
-            "lastEdited": "2024-08-30T14:41:00.211Z",
-            "author": {
-                "username": "rick"
+                "username": "admin"
             },
             "_count": {
                 "comments": 1
+            }
+        },
+        {
+            "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+            "totalRating": 2,
+            "title": "Pellentesque dolor risus",
+            "content": "Etiam gravida vestibulum turpis, quis aliquam tellus dictum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+            "published": true,
+            "publishedAt": "2024-09-12T17:37:36.433Z",
+            "lastEditedAt": "2024-09-12T17:38:03.308Z",
+            "author": {
+                "username": "kyle"
+            },
+            "_count": {
+                "comments": 3
+            }
+        },
+        {
+            "id": "b43e63ce-d2c6-4dc5-a431-3b78c83dd2d8",
+            "totalRating": -1,
+            "title": "Suspendisse vitae augue ac dui",
+            "content": "Pellentesque lobortis sagittis neque, et consequat nulla finibus at. Nam massa justo, hendrerit id lacus ac, dictum viverra erat. Proin et auctor tortor.",
+            "published": true,
+            "publishedAt": "2024-09-12T17:51:51.704Z",
+            "lastEditedAt": null,
+            "author": {
+                "username": "kyle"
+            },
+            "_count": {
+                "comments": 0
             }
         }
     ]
@@ -471,26 +461,26 @@ Requires user to be logged in
     * ```published: {{boolean}}```
 * Example request:
  
-    ```POST``` ```https://blogger.adaptable.app/posts```
+    ```POST``` ```https://project-blog-api.onrender.com/posts```
     ```
     {
-        "title": "Etiam porttitor, dui in egestas fermentum",
-        "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
+        "title": "Nunc tortor dui, semper vitae",
+        "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
         "published": true
     }
     ```
 * Example response:
     ```json
     {
-        "id": "ec1cd846-5f5b-4d6e-b382-cf9319216d1a",
-        "averageRating": null,
-        "title": "Etiam porttitor, dui in egestas fermentum",
-        "content": "Suspendisse auctor nulla eleifend semper aliquam.",
+        "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+        "totalRating": 0,
+        "title": "Nunc tortor dui, semper vitae",
+        "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
         "published": true,
-        "publishedAt": "2024-08-30T17:34:44.228Z",
-        "lastEdited": null,
+        "publishedAt": "2024-09-12T13:32:56.875Z",
+        "lastEditedAt": null,
         "author": {
-            "username": "rick"
+            "username": "admin"
         },
         "comments": []
     }
@@ -500,29 +490,29 @@ Requires user to be logged in
 ### Retrieve a specific post<a name="retrieve-post"></a>
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    ```GET``` ```https://project-blog-api.onrender.com/posts/e4041898-8ab3-4394-a40e-1bea1116ce2d```
 * Example response:
     ```json
     {
-        "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
-        "averageRating": null,
-        "title": "Etiam porttitor, dui in egestas fermentum",
-        "content": "Curabitur ornare tortor mauris, et vehicula turpis condimentum vitae. Quisque rhoncus justo in lectus feugiat tempus. Sed laoreet tortor elit. Maecenas eros quam, tempus et nulla eget, scelerisque accumsan magna.",
+        "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+        "totalRating": 0,
+        "title": "Nunc tortor dui, semper vitae",
+        "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
         "published": true,
-        "publishedAt": "2024-08-30T14:36:46.192Z",
-        "lastEdited": "2024-08-30T14:41:00.211Z",
+        "publishedAt": "2024-09-12T13:32:56.875Z",
+        "lastEditedAt": null,
         "author": {
-            "username": "rick"
+            "username": "admin"
         },
         "comments": [
             {
-                "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
-                "content": "Suspendisse auctor nulla eleifend semper aliquam.",
+                "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
+                "content": "Suspendisse semper justo facilisis luctus tempor.",
                 "author": {
-                    "username": "rick"
+                    "username": "admin"
                 },
-                "posted": "2024-08-30T16:56:43.804Z",
-                "lastEdited": "2024-08-30T17:10:53.553Z"
+                "postedAt": "2024-09-12T13:33:20.112Z",
+                "lastEditedAt": null
             }
         ]
     }
@@ -538,28 +528,28 @@ Requires user to be logged in and to match the post's author
     * ```published: {{boolean}}``` (previously published posts cannot be unpublished)
 * Example request:
     
-    ```PUT``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    ```PUT``` ```https://project-blog-api.onrender.com/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
     ```json
     {
         "title": "Nunc tortor dui, semper vitae",
-        "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor."
+        "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
     }
     ```
 * Example response:
     ```json
     {
-        "id": "b607265a-19ab-4ac4-a603-c2ff640839e5",
+        "id": "e2950951-26c6-4730-80b8-f68cbc39654f",
+        "totalRating": 0,
         "title": "Nunc tortor dui, semper vitae",
-        "averageRating": null,
         "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
         "published": true,
-        "publishedAt": "2024-08-30T14:36:46.192Z",
-        "lastEdited": "2024-08-30T17:40:00.927Z",
+        "publishedAt": "2024-09-12T18:05:11.262Z",
+        "lastEditedAt": null,
         "author": {
             "username": "rick"
         },
         "_count": {
-            "comments": 1
+            "comments": 0
         }
     }
     ```
@@ -569,7 +559,7 @@ Requires user to be logged in and to match the post's author
 Requires user to be logged in and to match the post's author
 * Example request:
     
-    ```DELETE```  ```https://blogger.adaptable.app/posts/f4a06acf-1ec8-4c7f-8b32-6287c74dd467```
+    ```DELETE```  ```https://project-blog-api.onrender.com/posts/f4a06acf-1ec8-4c7f-8b32-6287c74dd467```
 * Example response:
  
     ```204 No Content```
@@ -587,30 +577,40 @@ Requires user to be logged in and to match the post's author
     * ```page``` - specifies which page of results to view
 * Example request:
     
-    ```GET```  ```https://blogger.adaptable.app/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/comments?sort=rating&order=desc&limit=5&page=1```
+    ```GET```  ```https://project-blog-api.onrender.com/posts/9834d824-04d4-44c5-9c82-95d829efcaa2/comments?sort=rating&order=desc&limit=5&page=1```
 * Example response:
  
-    ```
+    ```json
     [
         {
-            "id": "73d992df-7757-49cc-88b8-fd471bf31b44",
+            "id": "87d11735-3ed9-46ce-a921-258824b56379",
             "totalRating": 0,
-            "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
+            "content": "Praesent orci libero, sodales sit amet convallis in, malesuada vel tortor.",
             "author": {
                 "username": "kyle"
             },
-            "postedAt": "2024-09-03T16:08:51.217Z",
+            "postedAt": "2024-09-12T18:00:16.346Z",
             "lastEditedAt": null
         },
         {
-            "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+            "id": "eafe76ba-7c6b-4cc1-9524-1ab6ee4ac005",
+            "totalRating": 0,
+            "content": "Phasellus quis tellus eu nisi tempor auctor. ",
+            "author": {
+                "username": "kyle"
+            },
+            "postedAt": "2024-09-12T18:00:39.809Z",
+            "lastEditedAt": null
+        },
+        {
+            "id": "42071463-e881-49dd-b773-739e3ff31777",
             "totalRating": -1,
-            "content": "Class aptent taciti sociosqu ad litora torquent.",
+            "content": "Curabitur at eros auctor massa imperdiet rhoncus ut sed diam. Donec ac efficitur eros.",
             "author": {
                 "username": "rick"
             },
-            "postedAt": "2024-08-30T23:26:51.912Z",
-            "lastEditedAt": null
+            "postedAt": "2024-09-12T17:49:57.340Z",
+            "lastEditedAt": "2024-09-12T18:00:58.181Z"
         }
     ]
     ```
@@ -622,19 +622,24 @@ Requires user to be logged in
     * ```content: {{string}}```
 * Example request:
     
-    ```POST``` ```https://blogger.adaptable.app/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
-    
+    ```POST``` ```https://project-blog-api.onrender.com/posts/e4041898-8ab3-4394-a40e-1bea1116ce2d/comments/```
+    ```json
+    {
+        "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec."
+    }
+    ```
 * Example response:
     ```json
     {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
+        "id": "9a2d5337-c7fa-49ae-b975-173e2db47d4e",
+        "totalRating": 0,
         "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
         "author": {
-            "username": "rick"
+            "username": "kyle"
         },
-        "posted": "2024-08-30T16:56:43.804Z",
-        "lastEdited": null,
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+        "postedAt": "2024-09-12T18:09:55.916Z",
+        "lastEditedAt": null,
+        "postId": "e4041898-8ab3-4394-a40e-1bea1116ce2d"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -645,24 +650,47 @@ Requires user to be logged in, , will update previous rating if found
     * ```rating (value must be -1, 0, or 1): {{int}}```
 * Example request:
     
-    ```POST``` ```https://blogger.adaptable.app/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/rating```
+    ```POST``` ```https://project-blog-api.onrender.com/posts/e4041898-8ab3-4394-a40e-1bea1116ce2d/ratings```
     ```json
     {
-        "rating": 1
+        "rating": -1
     }
     ```
 * Example response:
     ```json
     {
-        "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-        "totalRating": 1,
-        "title": "Lorem ipsum dolor sit amet",
-        "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
-        "createdAt": "2024-08-30T21:53:11.473Z",
+        "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+        "totalRating": -1,
+        "title": "Nunc tortor dui, semper vitae",
+        "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
         "published": true,
-        "publishedAt": "2024-08-30T21:58:29.986Z",
+        "publishedAt": "2024-09-12T13:32:56.875Z",
         "lastEditedAt": null,
-        "authorId": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510"
+        "author": {
+            "username": "admin"
+        },
+        "comments": [
+            {
+                "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
+                "totalRating": 0,
+                "content": "Suspendisse semper justo facilisis luctus tempor.",
+                "author": {
+                    "username": "admin"
+                },
+                "postedAt": "2024-09-12T13:33:20.112Z",
+                "lastEditedAt": null
+            },
+            {
+                "id": "9a2d5337-c7fa-49ae-b975-173e2db47d4e",
+                "totalRating": 0,
+                "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+                "author": {
+                    "username": "kyle"
+                },
+                "postedAt": "2024-09-12T18:09:55.916Z",
+                "lastEditedAt": null
+            }
+        ]
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -673,24 +701,47 @@ Requires user to be logged in, will create a new rating if no previous rating is
     * ```rating (value must be -1, 0, or 1): {{int}}```
 * Example request:
     
-    ```PUT``` ```https://blogger.adaptable.app/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/rating```
+    ```PUT``` ```https://project-blog-api.onrender.com/posts/e4041898-8ab3-4394-a40e-1bea1116ce2d/ratings```
     ```json
     {
-        "rating": -1
+        "rating": 1
     }
     ```
 * Example response:
     ```json
     {
-        "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-        "totalRating": -1,
-        "title": "Lorem ipsum dolor sit amet",
-        "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
-        "createdAt": "2024-08-30T21:53:11.473Z",
+        "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+        "totalRating": 1,
+        "title": "Nunc tortor dui, semper vitae",
+        "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
         "published": true,
-        "publishedAt": "2024-08-30T21:58:29.986Z",
+        "publishedAt": "2024-09-12T13:32:56.875Z",
         "lastEditedAt": null,
-        "authorId": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510"
+        "author": {
+            "username": "admin"
+        },
+        "comments": [
+            {
+                "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
+                "totalRating": 0,
+                "content": "Suspendisse semper justo facilisis luctus tempor.",
+                "author": {
+                    "username": "admin"
+                },
+                "postedAt": "2024-09-12T13:33:20.112Z",
+                "lastEditedAt": null
+            },
+            {
+                "id": "9a2d5337-c7fa-49ae-b975-173e2db47d4e",
+                "totalRating": 0,
+                "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+                "author": {
+                    "username": "kyle"
+                },
+                "postedAt": "2024-09-12T18:09:55.916Z",
+                "lastEditedAt": null
+            }
+        ]
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -698,19 +749,20 @@ Requires user to be logged in, will create a new rating if no previous rating is
 ### Retrieve a comment<a name="retrieve-comment"></a>
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
+    ```GET``` ```https://project-blog-api.onrender.com/comments/449a0cee-86a6-47df-bf1a-e7a9f66c9df7```
     
 * Example response:
     ```json
     {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
-        "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+        "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
+        "totalRating": 0,
+        "content": "Suspendisse semper justo facilisis luctus tempor.",
         "author": {
-            "username": "rick"
+            "username": "admin"
         },
-        "posted": "2024-08-30T16:56:43.804Z",
-        "lastEdited": null,
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+        "postedAt": "2024-09-12T13:33:20.112Z",
+        "lastEditedAt": null,
+        "postId": "e4041898-8ab3-4394-a40e-1bea1116ce2d"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -721,7 +773,7 @@ Requires user to be logged in and to match the comment's author
     * ```content: {{string}}```
 * Example request:
 
-    ```PUT``` ```https://blogger.adaptable.app/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
+    ```PUT``` ```https://project-blog-api.onrender.com/comments/449a0cee-86a6-47df-bf1a-e7a9f66c9df7```
     ```json
     {
         "content": "Suspendisse auctor nulla eleifend semper aliquam."
@@ -730,14 +782,15 @@ Requires user to be logged in and to match the comment's author
 * Example response:
     ```json
     {
-        "id": "ce491536-8c12-4228-aead-a7c34a7f1a02",
+        "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
+        "totalRating": 0,
         "content": "Suspendisse auctor nulla eleifend semper aliquam.",
         "author": {
-            "username": "rick"
+            "username": "admin"
         },
-        "posted": "2024-08-30T16:56:43.804Z",
-        "lastEdited": "2024-08-30T17:10:53.553Z",
-        "postId": "b607265a-19ab-4ac4-a603-c2ff640839e5"
+        "postedAt": "2024-09-12T13:33:20.112Z",
+        "lastEditedAt": "2024-09-12T18:17:21.745Z",
+        "postId": "e4041898-8ab3-4394-a40e-1bea1116ce2d"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -746,7 +799,7 @@ Requires user to be logged in and to match the comment's author
 Requires user to be logged in and to match the comment's author
 * Example request:
 
-    ```DELETE``` ```https://blogger.adaptable.app/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
+    ```DELETE``` ```https://project-blog-api.onrender.com/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
 * Example response:
  
     ```204 No Content```
@@ -758,7 +811,7 @@ Requires user to be logged in, will update previous rating if found
     * ```rating (value must be -1, 0, or 1): {{int}}```
 * Example request:
     
-    ```POST``` ```https://blogger.adaptable.app/comments/f7d6779b-38e2-4f89-91eb-f6d79bc68b39/rating```
+    ```POST``` ```https://project-blog-api.onrender.com/comments/449a0cee-86a6-47df-bf1a-e7a9f66c9df7/ratings```
     ```json
     {
         "rating": 1
@@ -767,15 +820,15 @@ Requires user to be logged in, will update previous rating if found
 * Example response:
     ```json
     {
-        "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+        "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
         "totalRating": 1,
-        "content": "Class aptent taciti sociosqu ad litora torquent.",
+        "content": "Suspendisse auctor nulla eleifend semper aliquam.",
         "author": {
-            "username": "rick"
+            "username": "admin"
         },
-        "postedAt": "2024-08-30T23:26:51.912Z",
-        "lastEditedAt": null,
-        "postId": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa"
+        "postedAt": "2024-09-12T13:33:20.112Z",
+        "lastEditedAt": "2024-09-12T18:17:21.745Z",
+        "postId": "e4041898-8ab3-4394-a40e-1bea1116ce2d"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -786,7 +839,7 @@ Requires user to be logged in, will create a new rating if no previous rating is
     * ```rating (value must be -1, 0, or 1): {{int}}```
 * Example request:
     
-    ```PUT``` ```https://blogger.adaptable.app/comments/f7d6779b-38e2-4f89-91eb-f6d79bc68b39/rating```
+    ```PUT``` ```https://project-blog-api.onrender.com/comments/449a0cee-86a6-47df-bf1a-e7a9f66c9df7/ratings```
     ```json
     {
         "rating": -1
@@ -795,15 +848,15 @@ Requires user to be logged in, will create a new rating if no previous rating is
 * Example response:
     ```json
     {
-        "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
+        "id": "449a0cee-86a6-47df-bf1a-e7a9f66c9df7",
         "totalRating": -1,
-        "content": "Class aptent taciti sociosqu ad litora torquent.",
+        "content": "Suspendisse auctor nulla eleifend semper aliquam.",
         "author": {
-            "username": "rick"
+            "username": "admin"
         },
-        "postedAt": "2024-08-30T23:26:51.912Z",
-        "lastEditedAt": null,
-        "postId": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa"
+        "postedAt": "2024-09-12T13:33:20.112Z",
+        "lastEditedAt": "2024-09-12T18:17:21.745Z",
+        "postId": "e4041898-8ab3-4394-a40e-1bea1116ce2d"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -822,37 +875,39 @@ Requires user to be logged in and have ADMIN role
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/admin/users?sort=comments&order=desc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/users?sort=comments&order=desc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+            "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
             "username": "rick",
-            "password": "$2a$10$JtIeqcyW4mrzp4XboUtgjuHljmrkRN4bEDJkDQ6GucKfh0nzUlgAu",
             "email": "rick@example.com",
+            "_count": {
+                "posts": 1,
+                "comments": 1
+            },
             "role": "USER"
         },
         {
-            "id": "8244da38-20b1-44db-acf6-670c84c88892",
-            "username": "jason",
-            "password": "$2a$10$3YXWpkJedltK0PPMI17/U.1DKpgnNrkZH3U/uUCs.WAMgJWjAq7Rm",
-            "email": "rick@example.com",
-            "role": "USER"
-        },
-        {
-            "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
-            "username": "kyle",
-            "password": "$2a$10$chMRtUcM5cquQRvWGsOayeoFMQY0S9.jgupc6KsZCHMUGtFhPIpe6",
-            "email": "kyle@example.com",
-            "role": "ADMIN"
-        },
-        {
-            "id": "f7a0a426-6ea8-4dbc-bfc2-f5c4e4c4466f",
+            "id": "a27939b8-48f9-43b8-b19c-9f5f6c184760",
             "username": "admin",
-            "password": "$2a$10$3tdHKav6ZxjsKLApo7/puu6oYl6UXTNCW2K7njoLHfJAlIRjXixcC",
             "email": "admin@example.com",
+            "_count": {
+                "posts": 1,
+                "comments": 1
+            },
             "role": "ADMIN"
+        },
+        {
+            "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+            "username": "kyle",
+            "email": "kyle@example.com",
+            "_count": {
+                "posts": 2,
+                "comments": 3
+            },
+            "role": "USER"
         }
     ]
      ```
@@ -863,76 +918,48 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/admin/users/rick```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/users/rick```
 * Example response:
     ```json
     {
-        "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+        "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
         "username": "rick",
         "_count": {
-            "posts": 2,
-            "comments": 2
+            "posts": 1,
+            "comments": 1
         },
         "email": "rick@example.com",
         "posts": [
             {
-                "id": "9c2e944f-f08b-456d-9b38-588806280390",
-                "totalRating": 1,
-                "title": "Mauris venenatis in massa sit amet vestibulum",
-                "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
-                "publishedAt": "2024-08-31T01:17:11.454Z",
+                "id": "e2950951-26c6-4730-80b8-f68cbc39654f",
+                "totalRating": 0,
+                "title": "Nunc tortor dui, semper vitae",
+                "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
+                "published": true,
+                "publishedAt": "2024-09-12T18:05:11.262Z",
                 "lastEditedAt": null,
                 "author": {
-                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
                     "username": "rick"
                 },
                 "_count": {
-                    "comments": 1
-                }
-            },
-            {
-                "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-                "totalRating": -1,
-                "title": "Lorem ipsum dolor sit amet",
-                "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
-                "publishedAt": "2024-08-30T21:58:29.986Z",
-                "lastEditedAt": null,
-                "author": {
-                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                    "username": "rick"
-                },
-                "_count": {
-                    "comments": 1
+                    "comments": 0
                 }
             }
         ],
         "comments": [
             {
-                "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
-                "content": "Class aptent taciti sociosqu ad litora torquent.",
-                "postedAt": "2024-08-30T23:26:51.912Z",
-                "lastEditedAt": null,
+                "id": "42071463-e881-49dd-b773-739e3ff31777",
+                "content": "Curabitur at eros auctor massa imperdiet rhoncus ut sed diam. Donec ac efficitur eros.",
+                "postedAt": "2024-09-12T17:49:57.340Z",
+                "lastEditedAt": "2024-09-12T18:00:58.181Z",
                 "author": {
-                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
                     "username": "rick"
                 },
                 "post": {
-                    "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-                    "title": "Lorem ipsum dolor sit amet"
-                }
-            },
-            {
-                "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
-                "content": "Proin cursus mi ut erat auctor.",
-                "postedAt": "2024-08-31T01:17:30.189Z",
-                "lastEditedAt": "2024-08-31T01:17:51.692Z",
-                "author": {
-                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                    "username": "rick"
-                },
-                "post": {
-                    "id": "9c2e944f-f08b-456d-9b38-588806280390",
-                    "title": "Mauris venenatis in massa sit amet vestibulum"
+                    "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+                    "title": "Pellentesque dolor risus"
                 }
             }
         ]
@@ -948,14 +975,14 @@ Requires user to be logged in and have ADMIN role
     * ```email: {{string}}```
     * ```role: {{ADMIN/USER}}```
 * Example request:
-    ```PUT``` ```https://blogger.adaptable.app/users/:username```
+    ```PUT``` ```https://project-blog-api.onrender.com/users/rick```
 
     ```json
     {
         "username": "ricky",
         "password": "password123",
         "email": "rick92@example.com",
-        "role": "USER"
+        "role": "ADMIN"
     }
     ```
 * Example response:
@@ -965,7 +992,7 @@ Requires user to be logged in and have ADMIN role
         "username": "ricky",
         "password": "password123",
         "email": "rick92@example.com",
-        "role": "USER"
+        "role": "ADMIN"
     }
     ```
 ##### <a href="#top"> Return to top</a>
@@ -974,7 +1001,7 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Example request:
 
-    ```DELETE``` ```https://blogger.adaptable.app/admin/users/jared```
+    ```DELETE``` ```https://project-blog-api.onrender.com/admin/users/jared```
 * Example response:
  
     ```204 No Content```
@@ -995,40 +1022,40 @@ Requires user to be logged in and have ADMIN role
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/admin/users/rick/posts?sort=title&order=desc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/users/kyle/posts?sort=title&order=desc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "9c2e944f-f08b-456d-9b38-588806280390",
-            "totalRating": 1,
-            "title": "Mauris venenatis in massa sit amet vestibulum",
-            "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+            "id": "b43e63ce-d2c6-4dc5-a431-3b78c83dd2d8",
+            "totalRating": -1,
+            "title": "Suspendisse vitae augue ac dui",
+            "content": "Pellentesque lobortis sagittis neque, et consequat nulla finibus at. Nam massa justo, hendrerit id lacus ac, dictum viverra erat. Proin et auctor tortor.",
             "published": true,
-            "publishedAt": "2024-08-31T01:17:11.454Z",
+            "publishedAt": "2024-09-12T17:51:51.704Z",
             "lastEditedAt": null,
             "author": {
-                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                "username": "rick"
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
             },
             "_count": {
-                "comments": 1
+                "comments": 0
             }
         },
         {
-            "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-            "totalRating": -1,
-            "title": "Lorem ipsum dolor sit amet",
-            "content": "Vestibulum metus tortor, gravida id ultricies eu, convallis in turpis. Ut eget augue egestas, venenatis sapien id, faucibus urna.",
+            "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+            "totalRating": 2,
+            "title": "Pellentesque dolor risus",
+            "content": "Etiam gravida vestibulum turpis, quis aliquam tellus dictum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
             "published": true,
-            "publishedAt": "2024-08-30T21:58:29.986Z",
-            "lastEditedAt": null,
+            "publishedAt": "2024-09-12T17:37:36.433Z",
+            "lastEditedAt": "2024-09-12T17:38:03.308Z",
             "author": {
-                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                "username": "rick"
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
             },
             "_count": {
-                "comments": 1
+                "comments": 3
             }
         }
     ]
@@ -1048,38 +1075,53 @@ Requires user to be logged in and have ADMIN role
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/admin/users/rick/comments?sort=date&order=asc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/users/kyle/comments?sort=date&order=asc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "f7d6779b-38e2-4f89-91eb-f6d79bc68b39",
-            "totalRating": -1,
-            "content": "Class aptent taciti sociosqu ad litora torquent.",
-            "postedAt": "2024-08-30T23:26:51.912Z",
+            "id": "87d11735-3ed9-46ce-a921-258824b56379",
+            "totalRating": 0,
+            "content": "Praesent orci libero, sodales sit amet convallis in, malesuada vel tortor.",
+            "postedAt": "2024-09-12T18:00:16.346Z",
             "lastEditedAt": null,
             "author": {
-                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                "username": "rick"
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
             },
             "post": {
-                "id": "f32b3b52-2a65-4c1d-9e2d-9e109436bffa",
-                "title": "Lorem ipsum dolor sit amet"
+                "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+                "title": "Pellentesque dolor risus"
             }
         },
         {
-            "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
-            "totalRating": 2,
-            "content": "Proin cursus mi ut erat auctor.",
-            "postedAt": "2024-08-31T01:17:30.189Z",
-            "lastEditedAt": "2024-08-31T01:17:51.692Z",
+            "id": "eafe76ba-7c6b-4cc1-9524-1ab6ee4ac005",
+            "totalRating": 0,
+            "content": "Phasellus quis tellus eu nisi tempor auctor. ",
+            "postedAt": "2024-09-12T18:00:39.809Z",
+            "lastEditedAt": null,
             "author": {
-                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                "username": "rick"
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
             },
             "post": {
-                "id": "9c2e944f-f08b-456d-9b38-588806280390",
-                "title": "Mauris venenatis in massa sit amet vestibulum"
+                "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+                "title": "Pellentesque dolor risus"
+            }
+        },
+        {
+            "id": "9a2d5337-c7fa-49ae-b975-173e2db47d4e",
+            "totalRating": 0,
+            "content": "Vivamus ullamcorper fringilla mauris, et scelerisque turpis rutrum nec.",
+            "postedAt": "2024-09-12T18:09:55.916Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
+            },
+            "post": {
+                "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+                "title": "Nunc tortor dui, semper vitae"
             }
         }
     ]
@@ -1099,21 +1141,21 @@ Requires user to be logged in and have ADMIN role
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/admin/users/kyle/drafts?sort=date&order=asc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/users/rick/drafts?sort=date&order=asc&limit=5&page=1```
 * Example response:
     ```json
     [
         {
-            "id": "20c680aa-2649-4ede-91a3-82938acf32d8",
+            "id": "be7d8b14-a71e-46bf-86a9-eda2a418f21c",
             "totalRating": 0,
-            "title": "Quisque pulvinar consequat euismod",
-            "content": "Mauris eget diam est. Praesent neque libero, tincidunt vestibulum diam nec, pulvinar sollicitudin augue. Pellentesque molestie arcu vel vestibulum maximus.",
+            "title": "Sed sit amet pulvinar neque, ut imperdiet nisi",
+            "content": "Aenean commodo, risus in eleifend finibus, nulla quam lacinia magna, et dapibus nulla lorem vitae sapien. Maecenas at interdum augue. Suspendisse eu placerat nibh.",
             "published": false,
             "publishedAt": null,
             "lastEditedAt": null,
             "author": {
-                "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
-                "username": "kyle"
+                "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
+                "username": "rick"
             },
             "_count": {
                 "comments": 0
@@ -1139,20 +1181,20 @@ Requires user to be logged in and have ADMIN role, includes drafts
     * ```page``` - specifies which page of results to view
 * Example request:
 
-    ```GET``` ```https://blogger.adaptable.app/admin/posts?sort=title&order=asc&limit=5&page=1```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/posts?sort=title&order=asc&limit=5&page=1```
 * Output example:
     ```json
     [
         {
-            "id": "58871ded-2f3b-4760-b2d4-c6bba5f30af4",
+            "id": "e2950951-26c6-4730-80b8-f68cbc39654f",
             "totalRating": 0,
-            "title": "Curabitur mollis velit elementum",
-            "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+            "title": "Nunc tortor dui, semper vitae",
+            "content": "Morbi vitae sem pharetra, suscipit diam in, vestibulum metus. Phasellus ultricies elementum enim, quis interdum tortor.",
             "published": true,
-            "publishedAt": "2024-08-31T01:16:11.191Z",
+            "publishedAt": "2024-09-12T18:05:11.262Z",
             "lastEditedAt": null,
             "author": {
-                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
                 "username": "rick"
             },
             "_count": {
@@ -1160,31 +1202,63 @@ Requires user to be logged in and have ADMIN role, includes drafts
             }
         },
         {
-            "id": "6f64d8fb-20c7-43b9-ba3c-617d7b68ad69",
-            "totalRating": 0,
-            "title": "Curabitur mollis velit elementum",
-            "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+            "id": "e4041898-8ab3-4394-a40e-1bea1116ce2d",
+            "totalRating": 1,
+            "title": "Nunc tortor dui, semper vitae",
+            "content": "Aenean sed massa sed ex suscipit lacinia. Praesent imperdiet ac justo lobortis accumsan.",
             "published": true,
-            "publishedAt": "2024-08-31T01:16:53.065Z",
+            "publishedAt": "2024-09-12T13:32:56.875Z",
             "lastEditedAt": null,
             "author": {
-                "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-                "username": "rick"
+                "id": "a27939b8-48f9-43b8-b19c-9f5f6c184760",
+                "username": "admin"
             },
             "_count": {
-                "comments": 0
+                "comments": 2
             }
         },
         {
-            "id": "20c680aa-2649-4ede-91a3-82938acf32d8",
+            "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+            "totalRating": 2,
+            "title": "Pellentesque dolor risus",
+            "content": "Etiam gravida vestibulum turpis, quis aliquam tellus dictum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+            "published": true,
+            "publishedAt": "2024-09-12T17:37:36.433Z",
+            "lastEditedAt": "2024-09-12T17:38:03.308Z",
+            "author": {
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
+            },
+            "_count": {
+                "comments": 3
+            }
+        },
+        {
+            "id": "be7d8b14-a71e-46bf-86a9-eda2a418f21c",
             "totalRating": 0,
-            "title": "Quisque pulvinar consequat euismod",
-            "content": "Mauris eget diam est. Praesent neque libero, tincidunt vestibulum diam nec, pulvinar sollicitudin augue. Pellentesque molestie arcu vel vestibulum maximus.",
+            "title": "Sed sit amet pulvinar neque, ut imperdiet nisi",
+            "content": "Aenean commodo, risus in eleifend finibus, nulla quam lacinia magna, et dapibus nulla lorem vitae sapien. Maecenas at interdum augue. Suspendisse eu placerat nibh.",
             "published": false,
             "publishedAt": null,
             "lastEditedAt": null,
             "author": {
-                "id": "a7c53100-6061-457f-ac56-cb5f02c791d2",
+                "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
+                "username": "rick"
+            },
+            "_count": {
+                "comments": 0
+            }
+        },
+        {
+            "id": "b43e63ce-d2c6-4dc5-a431-3b78c83dd2d8",
+            "totalRating": -1,
+            "title": "Suspendisse vitae augue ac dui",
+            "content": "Pellentesque lobortis sagittis neque, et consequat nulla finibus at. Nam massa justo, hendrerit id lacus ac, dictum viverra erat. Proin et auctor tortor.",
+            "published": true,
+            "publishedAt": "2024-09-12T17:51:51.704Z",
+            "lastEditedAt": null,
+            "author": {
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
                 "username": "kyle"
             },
             "_count": {
@@ -1199,31 +1273,51 @@ Requires user to be logged in and have ADMIN role, includes drafts
 Requires user to be logged in and have ADMIN role
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/admin/posts/b607265a-19ab-4ac4-a603-c2ff640839e5```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/posts/9834d824-04d4-44c5-9c82-95d829efcaa2```
 * Example response:
     ```json
     {
-        "id": "9c2e944f-f08b-456d-9b38-588806280390",
-        "totalRating": 1,
-        "title": "Mauris venenatis in massa sit amet vestibulum",
-        "content": "Nam tortor risus, egestas sit amet ornare at, pulvinar imperdiet lorem. Aliquam id pellentesque tellus, sit amet vehicula lectus. Vestibulum et velit velit.",
+        "id": "9834d824-04d4-44c5-9c82-95d829efcaa2",
+        "totalRating": 2,
+        "title": "Pellentesque dolor risus",
+        "content": "Etiam gravida vestibulum turpis, quis aliquam tellus dictum id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
         "published": true,
-        "publishedAt": "2024-08-31T01:17:11.454Z",
-        "lastEditedAt": null,
+        "publishedAt": "2024-09-12T17:37:36.433Z",
+        "lastEditedAt": "2024-09-12T17:38:03.308Z",
         "author": {
-            "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-            "username": "rick"
+            "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+            "username": "kyle"
         },
         "comments": [
             {
-                "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
-                "content": "Proin cursus mi ut erat auctor.",
+                "id": "87d11735-3ed9-46ce-a921-258824b56379",
+                "content": "Praesent orci libero, sodales sit amet convallis in, malesuada vel tortor.",
                 "author": {
-                    "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
+                    "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                    "username": "kyle"
+                },
+                "postedAt": "2024-09-12T18:00:16.346Z",
+                "lastEditedAt": null
+            },
+            {
+                "id": "eafe76ba-7c6b-4cc1-9524-1ab6ee4ac005",
+                "content": "Phasellus quis tellus eu nisi tempor auctor. ",
+                "author": {
+                    "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                    "username": "kyle"
+                },
+                "postedAt": "2024-09-12T18:00:39.809Z",
+                "lastEditedAt": null
+            },
+            {
+                "id": "42071463-e881-49dd-b773-739e3ff31777",
+                "content": "Curabitur at eros auctor massa imperdiet rhoncus ut sed diam. Donec ac efficitur eros.",
+                "author": {
+                    "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
                     "username": "rick"
                 },
-                "postedAt": "2024-08-31T01:17:30.189Z",
-                "lastEditedAt": "2024-08-31T01:17:51.692Z"
+                "postedAt": "2024-09-12T17:49:57.340Z",
+                "lastEditedAt": "2024-09-12T18:00:58.181Z"
             }
         ]
     }
@@ -1234,7 +1328,7 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Example request:
     
-    ```DELETE```  ```https://blogger.adaptable.app/posts/f4a06acf-1ec8-4c7f-8b32-6287c74dd467```
+    ```DELETE```  ```https://project-blog-api.onrender.com/posts/f4a06acf-1ec8-4c7f-8b32-6287c74dd467```
 * Example response:
  
     ```204 No Content```
@@ -1253,7 +1347,7 @@ Requires user to be logged in and have ADMIN role
     * ```page``` - specifies which page of results to view
 * Example request:
     
-    ```GET```  ```https://blogger.adaptable.app/admin/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/comments?sort=rating&order=desc&limit=5&page=1```
+    ```GET```  ```https://project-blog-api.onrender.com/admin/posts/f32b3b52-2a65-4c1d-9e2d-9e109436bffa/comments?sort=rating&order=desc&limit=5&page=1```
 * Example response:
  
     ```
@@ -1288,22 +1382,45 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Example request:
     
-    ```GET``` ```https://blogger.adaptable.app/admin/comments/5bcb615e-182e-4f09-acea-de4bee21c03f```
+    ```GET``` ```https://project-blog-api.onrender.com/admin/comments/5bcb615e-182e-4f09-acea-de4bee21c03f```
     
 * Example response:
     ```json
-    {
-        "id": "5bcb615e-182e-4f09-acea-de4bee21c03f",
-        "totalRating": 2,
-        "content": "Proin cursus mi ut erat auctor.",
-        "author": {
-            "id": "0ce714e8-f3d1-41ba-8d3b-699b6ecc8510",
-            "username": "rick"
+    [
+        {
+            "id": "87d11735-3ed9-46ce-a921-258824b56379",
+            "totalRating": 0,
+            "content": "Praesent orci libero, sodales sit amet convallis in, malesuada vel tortor.",
+            "author": {
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
+            },
+            "postedAt": "2024-09-12T18:00:16.346Z",
+            "lastEditedAt": null
         },
-        "postedAt": "2024-08-31T01:17:30.189Z",
-        "lastEditedAt": "2024-08-31T01:17:51.692Z",
-        "postId": "9c2e944f-f08b-456d-9b38-588806280390"
-    }
+        {
+            "id": "eafe76ba-7c6b-4cc1-9524-1ab6ee4ac005",
+            "totalRating": 0,
+            "content": "Phasellus quis tellus eu nisi tempor auctor. ",
+            "author": {
+                "id": "f04424a0-2914-4a52-8e5f-5786e1950efa",
+                "username": "kyle"
+            },
+            "postedAt": "2024-09-12T18:00:39.809Z",
+            "lastEditedAt": null
+        },
+        {
+            "id": "42071463-e881-49dd-b773-739e3ff31777",
+            "totalRating": -1,
+            "content": "Curabitur at eros auctor massa imperdiet rhoncus ut sed diam. Donec ac efficitur eros.",
+            "author": {
+                "id": "955179b6-fb33-4f55-a73f-4ccacc422c69",
+                "username": "rick"
+            },
+            "postedAt": "2024-09-12T17:49:57.340Z",
+            "lastEditedAt": "2024-09-12T18:00:58.181Z"
+        }
+    ]
     ```
 ##### <a href="#top"> Return to top</a>
 ------------------------------------------------------------------------------------------
@@ -1311,7 +1428,7 @@ Requires user to be logged in and have ADMIN role
 Requires user to be logged in and have ADMIN role
 * Example request:
 
-    ```DELETE``` ```https://blogger.adaptable.app/admin/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
+    ```DELETE``` ```https://project-blog-api.onrender.com/admin/comments/ce491536-8c12-4228-aead-a7c34a7f1a02```
 * Example response:
  
     ```204 No Content```

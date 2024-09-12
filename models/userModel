@@ -83,6 +83,7 @@ async function getUserByUsername(query) {
       comments: {
         select: {
           id: true,
+          totalRating: true,
           content: true,
           postedAt: true,
           lastEditedAt: true,

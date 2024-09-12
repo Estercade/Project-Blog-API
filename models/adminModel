@@ -46,6 +46,7 @@ async function getUserByUsername(query) {
           totalRating: true,
           title: true,
           content: true,
+          published: true,
           publishedAt: true,
           lastEditedAt: true,
           author: {

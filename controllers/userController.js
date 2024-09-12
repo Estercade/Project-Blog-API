@@ -138,7 +138,7 @@ async function getPostsByUsername(req, res) {
   }
   const posts = await userModel.getPostsByUsername(query);
   // database query will return null if specified user does not exist
-  if (!comments) {
+  if (!posts) {
     return res.status(404).json("Specified user does not exist.");
   }
   res.json(posts);
